@@ -6,4 +6,6 @@ class Stock
     public string Ticker { get; set; }
     public string Sector { get; set; }
 
+    //Runtime properties
+    public string ListingName { get; set; }
 }

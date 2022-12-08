@@ -45,10 +45,7 @@ class ActiveOrderDB : DBConnection
                 var result = connection.Query<ActiveOrder>(query).ToList();
                 return result;
             }
-            catch (System.InvalidOperationException)
-            {
-                return null;
-            }
+           
             catch (System.Exception e)
             {
                 throw e;
