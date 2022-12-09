@@ -7,6 +7,10 @@ ActiveOrderDB hejhej = new();
 ListingDB listingDB = new();
 List <Stock> Stocks = stockDB.ReadAllStocks();
 Stocks = listingDB.SetListingName(Stocks);
+CustomerDB customerDB = new();
+
+UI myUi = new();
+myUi.MainMenu();
 
 
 ActiveOrder myActiveOrder = new();

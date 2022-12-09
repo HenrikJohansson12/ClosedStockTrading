@@ -31,7 +31,7 @@ class ActiveOrderDB : DBConnection
 
     }
 
-    public List<ActiveOrder> GetAllActiveOrders()
+    public List<ActiveOrder> GetAllActiveOrders() //TODO dynamic parameters
     {
 
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
