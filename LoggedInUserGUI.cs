@@ -1,55 +1,48 @@
-class UI
+class LoggedInUserGUI
 {  
-    public void MainMenu ()
+    public void MainMenu (Customer loggedInCustomer)
     {
-         Customer loggedInCustomer = new();
+        
+         ActiveOrderDB activeOrderDB = new();
+
          
-
-         loggedInCustomer = LogInMenu ();
-
+        //Hämta aktiekonton
          loggedInCustomer.GetCustomerStockAccountsFromDataBase(); //Använda delegat??
 
+        //Hämta aktier på varje konto. 
         foreach (var stockAccount in loggedInCustomer.CustomerStockAccounts)
         {
             stockAccount.GetOwnedStocksFromDatabase();
         }
 
+
         foreach (var stockAccount in loggedInCustomer.CustomerStockAccounts)
         {
             foreach (var Stock in stockAccount.OwnedStocks)
             {
-                Console.WriteLine(Stock.Id + " " + Stock.ListingId + " " + Stock.ListingName + " " + Stock.Name + " " + Stock.Sector + " " + Stock.Ticker);
+               Stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(Stock.Id);
+               Stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(Stock.Id);
+
             }
         }
 
 
-
-
-    }
-
-
-    public Customer LogInMenu() //TODO kolla så den verkligen returnerar null vid fel. 
-    {
-        CustomerDB customerDB = new ();
-        
-
-        while (true)
+        string header = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}", "Id", "Ticker", "Name", "Sector", "List", "Highest Buy", "Lowest Sell", "Last sold for");
+        Console.WriteLine(header);
+         foreach (var stockAccount in loggedInCustomer.CustomerStockAccounts)
         {
-          //  System.Console.WriteLine("Ange personnummer");
-            string personalNumber = "19991231-1234";
-          //  System.Console.WriteLine("Ange lösenord");
-            string password = "password";
-            if (customerDB.CustomerLogIn(personalNumber, password) != null)
+            foreach (var stock in stockAccount.OwnedStocks)
             {
-                Customer loggedInCustomer = customerDB.CustomerLogIn(personalNumber, password);
-
-                return loggedInCustomer;
+               string content = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}",
+                              stock.Id, stock.Ticker, stock.Name, stock.Sector, stock.ListingName, stock.HighestActiveBuyPrice, stock.LowestActiveSellPrice,stock.LastKnownPrice);
+                 Console.WriteLine($"{content}");
             }
-            else Console.WriteLine("Felaktigt användarnamn eller lösenord");
         }
 
     }
 
+
+    
     
 
     public ActiveOrder CreateActiveBuyOrderObject()

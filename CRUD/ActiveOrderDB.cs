@@ -53,16 +53,77 @@ class ActiveOrderDB : DBConnection
 
         }
     }
+
+
+     public double GetHighestActiveBuyPrice(int stockId) 
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@StockId",stockId);
+
+        string query = "SELECT MAX(price_per_stock) FROM active_orders"+
+                        " WHERE is_buy_order = TRUE AND is_active = TRUE AND stock_id = @StockId;";
+
+            
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                double highestActiveBuyPrice = connection.QuerySingle<double>(query,parameters);
+                if (highestActiveBuyPrice != null)
+                {
+                    return highestActiveBuyPrice;
+                }
+                else  return highestActiveBuyPrice = 0;
+            }
+           
+            catch (System.Data.DataException n)
+            {
+                double returnvalue = 0;
+                return returnvalue;
+            }
+
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
+
+
+     public double GetLowestActiveSellPrice(int stockId) 
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@StockId",stockId);
+
+        string query = "SELECT MIN(price_per_stock) FROM active_orders"+
+                        " WHERE is_buy_order = FALSE AND is_active = TRUE AND stock_id = @StockId;";
+
+            
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                double lowestActiveSellPrice = connection.QuerySingle<double>(query,parameters);
+
+                if (lowestActiveSellPrice != null)
+                {
+                    return lowestActiveSellPrice;
+                }
+                else return lowestActiveSellPrice = 0;
+            }
+           
+            catch (System.Data.DataException n)
+            {
+                double returnvalue = 0;
+                return returnvalue;
+            }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
 }
 
-/*
-
-id	
-stock_id	
-account_id	
-price_per_stock	
-amount	
-is_buy_order	
-order_date_time	
-is_active
-*/

@@ -10,6 +10,9 @@ class Stock
     public string ListingName { get; set; }
 
     public double LastKnownPrice { get; set; }
+    public double LowestActiveSellPrice { get; set; }
+    public double HighestActiveBuyPrice { get; set; }
+
 
     public int AmountOnCustomerAccount { get; set; }
 }
