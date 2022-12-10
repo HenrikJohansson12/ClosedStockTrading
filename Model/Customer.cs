@@ -11,10 +11,5 @@ class Customer
     public List<StockAccount> CustomerStockAccounts { get; set; }
 
 
-    public void GetCustomerStockAccountsFromDataBase ()
-    {
-        StockAccountDB stockAccountDB = new();
-       CustomerStockAccounts = stockAccountDB.GetCustomerStockAccountFromDataBase(Id);
-    }
-}
-    
+   
+}   

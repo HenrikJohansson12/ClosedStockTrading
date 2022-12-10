@@ -12,9 +12,4 @@ class StockAccount
     public List <Stock> OwnedStocks { get; set; }
 
 
-    public void GetOwnedStocksFromDatabase ()
-    {
-        StockDB stockDB = new();
-        OwnedStocks = stockDB.StocksByAccountId(Id);
-    }
 }
