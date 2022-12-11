@@ -3,9 +3,19 @@ class LoggedInUserGUI
     public void MainMenu(Customer loggedInCustomer)
     {
 
+        Console.WriteLine($"Välkommen {loggedInCustomer.Name}\n\n");
 
+        //Här printa kontoinfo samt möjlighet att välja ett konto. 
 
+        //När man valt konto ska man kunna göra följande. 
+        // 1. Se aktielista med aktuella kurser samt kunna göra en refresh härifrån. 
+        // 2. Sälja aktier. Man ska bara kunna sälja det man äger så tänker att man får välja med ett ID och sen gå vidare till köp där man skriver pris och antal. 
+        // 3. Köpa aktier. Här ska man kunna välja på alla tillgängliga aktier i en lista. 
+        // 4. Kunna se sina aktiva ordrar och ta bort dom. 
+        // 4. Se köp och sälj historik
+        // 5. BonusFeature, kunna sätta in och ta ut pengar med hjälp en ny många till många tabell. 
         loggedInCustomer.CustomerStockAccounts = LoadCustomerAccounts(loggedInCustomer.Id);
+       
 
 
 
@@ -29,7 +39,11 @@ class LoggedInUserGUI
 
     }
 
+    public void PrintStockAccountInfo(List<StockAccount> customerStockAccounts)
+    {   
+        Console.WriteLine(string.Format("{0,-5} {1,-20} {2,-15} {3,-15} {4,-15}","Id","Account name","Stock value","Cash","Total value"));
 
+    }
 
     public List<StockAccount> LoadCustomerAccounts(int customerId)
     {
