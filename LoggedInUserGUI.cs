@@ -17,6 +17,38 @@ class LoggedInUserGUI
         loggedInCustomer.CustomerStockAccounts = LoadCustomerAccounts(loggedInCustomer.Id);
        
 
+        // Sekvensen för att skapa en order. 
+        ActiveOrderDB activeOrderDB = new();
+        ActiveOrderManager activeOrderManager = new();
+        StockTransactionManager stockTransactionManager = new();
+        StockTransaction myStockTransaction = new();
+        //Skapa objektet av indata. 
+        ActiveOrder myActiveOrder = CreateActiveBuyOrderObject();
+        //Spara i databasen och returnera dess ID. 
+        myActiveOrder.Id = activeOrderDB.CreateActiveOrder(myActiveOrder);
+        //Hämta en lista med kompatibla ordrar. 
+        List<ActiveOrder> matchingOrders = activeOrderManager.LookForCompatibleOrdersAfterPlacingOrder(myActiveOrder);
+        //Ifall jag köper. 
+        if (myActiveOrder.IsBuyOrder == true)
+        {
+                        
+              foreach (var sellOrder in matchingOrders)
+        {
+            //Skapar en stocktransaction object. 
+            myStockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder,sellOrder);
+            //Tar bort antalet från säljordern. 
+             myActiveOrder.Amount =  myActiveOrder.Amount - sellOrder.Amount;
+             //Sätt aktiva orders som inaktiv och spara transaktionen till DB
+             
+             //Är amount på min aktiva order mindre eller lika med 0. Avbryt loopen. 
+            if (myActiveOrder.Amount <=0)
+            {
+                break; 
+            }
+           
+        }
+        }
+      
 
 
 
@@ -38,7 +70,7 @@ class LoggedInUserGUI
         }
 
     }
-
+    
     public void PrintStockAccountInfo(List<StockAccount> customerStockAccounts)
     {   
         Console.WriteLine(string.Format("{0,-5} {1,-20} {2,-15} {3,-15} {4,-15}","Id","Account name","Stock value","Cash","Total value"));
@@ -94,7 +126,7 @@ class LoggedInUserGUI
         myBuyOrder.PricePerStock = Convert.ToDouble(Console.ReadLine());
         myBuyOrder.OrderTimeStamp = DateTime.Now;
 
-        myBuyOrder.AccountId = 3;
+        myBuyOrder.AccountId = 3; //TODO
 
         return myBuyOrder;
 

@@ -29,50 +29,50 @@ class ActiveOrderDB : DBConnection
     public void CloseActiveOrder(int orderId)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@Id",orderId);
+        parameters.Add("@Id", orderId);
 
         string query = "UPDATE active_orders SET is_active = 0 WHERE id = @Id;";
 
-         using (var connection = DBConnect())
+        using (var connection = DBConnect())
         {
             try
             {
                 connection.Execute(query, parameters);
-                
+
             }
             catch (System.Exception e)
             {
                 throw e;
             }
         }
-        
+
     }
 
 
 
-     public void UpdateAmountInActiveOrder(int orderId,int newAmount)
+    public void UpdateAmountInActiveOrder(int orderId, int newAmount)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@Id",orderId);
-        parameters.Add("@Amount",newAmount);
+        parameters.Add("@Id", orderId);
+        parameters.Add("@Amount", newAmount);
 
         string query = "UPDATE active_orders SET amount = @Amount WHERE id = @Id;";
 
-         using (var connection = DBConnect())
+        using (var connection = DBConnect())
         {
             try
             {
                 connection.Execute(query, parameters);
-                
+
             }
             catch (System.Exception e)
             {
                 throw e;
             }
         }
-        
+
     }
-    public List<ActiveOrder> GetAllActiveOrders() //TODO dynamic parameters
+    public List<ActiveOrder> GetAllActiveOrders()
     {
 
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
@@ -86,7 +86,7 @@ class ActiveOrderDB : DBConnection
                 var result = connection.Query<ActiveOrder>(query).ToList();
                 return result;
             }
-           
+
             catch (System.Exception e)
             {
                 throw e;
@@ -95,28 +95,63 @@ class ActiveOrderDB : DBConnection
         }
     }
 
-
-     public double GetHighestActiveBuyPrice(int stockId) 
+    public List<ActiveOrder> GetAllCompatableActiveOrders(bool isBuyOrder, int stockId, double pricePerStock)
     {
+        char sign;       
+        //Letar vi efter en köporder måste priset vara större än eller lika med det vi säljer för.      
+        if (isBuyOrder == true) sign = '>';
+        else sign = '<';
+
+
         var parameters = new DynamicParameters();
-        parameters.Add("@StockId",stockId);
+        parameters.Add("@IsBuyOrder", isBuyOrder);
+        parameters.Add("@StockId", stockId);
+        parameters.Add("@PricePerStock", pricePerStock);
+        parameters.Add("@Sign", sign);
 
-        string query = "SELECT MAX(price_per_stock) FROM active_orders"+
-                        " WHERE is_buy_order = TRUE AND is_active = TRUE AND stock_id = @StockId;";
 
-            
+
+        string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "WHERE is_active = true AND is_buy_order = @IsBuyOrder AND stock_id = @StockId AND price_per_stock @Sign= @PricePerStock;";
+
         using (var connection = DBConnect())
         {
             try
             {
-                double highestActiveBuyPrice = connection.QuerySingle<double>(query,parameters);
+                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query).ToList();
+                return compatableOrders;
+            }
+
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
+
+    public double GetHighestActiveBuyPrice(int stockId)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@StockId", stockId);
+
+        string query = "SELECT MAX(price_per_stock) FROM active_orders" +
+                        " WHERE is_buy_order = TRUE AND is_active = TRUE AND stock_id = @StockId;";
+
+
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                double highestActiveBuyPrice = connection.QuerySingle<double>(query, parameters);
                 if (highestActiveBuyPrice != null)
                 {
                     return highestActiveBuyPrice;
                 }
-                else  return highestActiveBuyPrice = 0;
+                else return highestActiveBuyPrice = 0;
             }
-           
+
             catch (System.Data.DataException n)
             {
                 double returnvalue = 0;
@@ -132,20 +167,20 @@ class ActiveOrderDB : DBConnection
     }
 
 
-     public double GetLowestActiveSellPrice(int stockId) 
+    public double GetLowestActiveSellPrice(int stockId)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@StockId",stockId);
+        parameters.Add("@StockId", stockId);
 
-        string query = "SELECT MIN(price_per_stock) FROM active_orders"+
+        string query = "SELECT MIN(price_per_stock) FROM active_orders" +
                         " WHERE is_buy_order = FALSE AND is_active = TRUE AND stock_id = @StockId;";
 
-            
+
         using (var connection = DBConnect())
         {
             try
             {
-                double lowestActiveSellPrice = connection.QuerySingle<double>(query,parameters);
+                double lowestActiveSellPrice = connection.QuerySingle<double>(query, parameters);
 
                 if (lowestActiveSellPrice != null)
                 {
@@ -153,7 +188,7 @@ class ActiveOrderDB : DBConnection
                 }
                 else return lowestActiveSellPrice = 0;
             }
-           
+
             catch (System.Data.DataException n)
             {
                 double returnvalue = 0;
