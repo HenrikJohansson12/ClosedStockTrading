@@ -97,10 +97,13 @@ class ActiveOrderDB : DBConnection
 
     public List<ActiveOrder> GetAllCompatableActiveOrders(bool isBuyOrder, int stockId, double pricePerStock)
     {
-        char sign;       
+        string sign;       
         //Letar vi efter en köporder måste priset vara större än eller lika med det vi säljer för.      
-        if (isBuyOrder == true) sign = '>';
-        else sign = '<';
+        if (isBuyOrder == true) 
+        {
+        sign = ">=";
+        }
+        else sign = "<=";
 
 
         var parameters = new DynamicParameters();
@@ -113,13 +116,13 @@ class ActiveOrderDB : DBConnection
 
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
          "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
-         "WHERE is_active = true AND is_buy_order = @IsBuyOrder AND stock_id = @StockId AND price_per_stock @Sign= @PricePerStock;";
+         "WHERE is_active = true AND is_buy_order = @IsBuyOrder AND stock_id = @StockId AND price_per_stock <= @PricePerStock;";
 
         using (var connection = DBConnect())
         {
             try
             {
-                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query).ToList();
+                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query,parameters).ToList();
                 return compatableOrders;
             }
 
@@ -145,14 +148,14 @@ class ActiveOrderDB : DBConnection
             try
             {
                 double highestActiveBuyPrice = connection.QuerySingle<double>(query, parameters);
-                if (highestActiveBuyPrice != null)
+                if (highestActiveBuyPrice != null) //TODO
                 {
                     return highestActiveBuyPrice;
                 }
                 else return highestActiveBuyPrice = 0;
             }
 
-            catch (System.Data.DataException n)
+            catch (System.Data.DataException)
             {
                 double returnvalue = 0;
                 return returnvalue;

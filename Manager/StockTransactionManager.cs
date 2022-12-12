@@ -28,30 +28,30 @@ class StockTransactionManager
             stockTransaction.Amount = buyOrder.Amount;
         }
         
-        //
+        //Den ordern som har minst antal blir den som hamnar på transaktionen
         else if (buyOrder.Amount>sellOrder.Amount)
         {
             stockTransaction.Amount = sellOrder.Amount;
 
-           buyOrder.Amount = buyOrder.Amount - sellOrder.Amount;
-           CreateOverFlowOrder(buyOrder);
+           
+          
             //TODO Använda delegater här istället?
         }
 
         else
         {
             stockTransaction.Amount = buyOrder.Amount;
-            sellOrder.Amount = sellOrder.Amount - buyOrder.Amount;
-           CreateOverFlowOrder(sellOrder);
+        
+           
         }
 
         return stockTransaction;
     }
 
-    public void CreateOverFlowOrder (ActiveOrder activeOrder)
+    public int SaveStockTransactionToDataBase (StockTransaction myStockTransaction)
     {
-        ActiveOrderDB activeOrderDB = new ActiveOrderDB();
-        activeOrderDB.CreateActiveOrder(activeOrder);
-
+        StockTransactionDB stockTransactionDB = new();
+        int transactionId = stockTransactionDB.SaveStockTransactionToDataBase(myStockTransaction);
+       return transactionId;
     }
 }

@@ -4,8 +4,13 @@ class ActiveOrderManager
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
+         bool isBuyOrder = false;
         //Ordern vi ska kolla ska vara motsatsen mot ordern som precis lagts. 
-        bool isBuyOrder = !myActiveOrder.IsBuyOrder;
+        if (myActiveOrder.IsBuyOrder == true)
+        {
+           isBuyOrder = false;
+        }
+        else isBuyOrder = true;
         
         compatibleOrders = activeOrderDB.GetAllCompatableActiveOrders(isBuyOrder,myActiveOrder.StockId,myActiveOrder.PricePerStock);
 
@@ -23,4 +28,21 @@ class ActiveOrderManager
        return compatibleOrders;
     
     } 
+
+    public void CompleteAndSplitOrder(ActiveOrder completedOrder,ActiveOrder splitOrder)
+    {
+        ActiveOrderDB activeOrderDB = new();
+        //Först sätta completedOrder som slutförd. 
+        activeOrderDB.CloseActiveOrder(completedOrder.Id);
+        //Sen ändra antal kvarvarande på den andra ordern. 
+        int updatedAmount = splitOrder.Amount-completedOrder.Amount;
+        activeOrderDB.UpdateAmountInActiveOrder(splitOrder.Id,updatedAmount);
+       //Nu sparar vi ett nytt record i DB med antalet som gick till avslut och sätter den till inaktiv.
+       //Detta gör vi för att hålla historiken intakt.  
+        splitOrder.Amount = completedOrder.Amount;
+        splitOrder.IsActive = false;
+        //Sparar objektet i DB. 
+        activeOrderDB.CreateActiveOrder(splitOrder);        
+
+    }
 }

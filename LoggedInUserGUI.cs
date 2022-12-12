@@ -21,31 +21,45 @@ class LoggedInUserGUI
         ActiveOrderDB activeOrderDB = new();
         ActiveOrderManager activeOrderManager = new();
         StockTransactionManager stockTransactionManager = new();
-        StockTransaction myStockTransaction = new();
+         List <StockTransaction> myStockTransactions = new();
         //Skapa objektet av indata. 
         ActiveOrder myActiveOrder = CreateActiveBuyOrderObject();
         //Spara i databasen och returnera dess ID. 
         myActiveOrder.Id = activeOrderDB.CreateActiveOrder(myActiveOrder);
         //Hämta en lista med kompatibla ordrar. 
         List<ActiveOrder> matchingOrders = activeOrderManager.LookForCompatibleOrdersAfterPlacingOrder(myActiveOrder);
+        
         //Ifall jag köper. 
         if (myActiveOrder.IsBuyOrder == true)
         {
                         
-              foreach (var sellOrder in matchingOrders)
-        {
-            //Skapar en stocktransaction object. 
-            myStockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder,sellOrder);
-            //Tar bort antalet från säljordern. 
-             myActiveOrder.Amount =  myActiveOrder.Amount - sellOrder.Amount;
-             //Sätt aktiva orders som inaktiv och spara transaktionen till DB
-             
-             //Är amount på min aktiva order mindre eller lika med 0. Avbryt loopen. 
-            if (myActiveOrder.Amount <=0)
-            {
+             for (int i = 0; i < matchingOrders.Count; i++)
+             {       
+            //Skapar en stocktransaction object och lägger till i listan. 
+            myStockTransactions.Add(stockTransactionManager.CreateStockTransactionObject(myActiveOrder,matchingOrders[i]));
+            
+          //kollar ifall antalet på säljordern är större än antalet på köpordern. 
+            if (matchingOrders[i].Amount>myActiveOrder.Amount)
+            {   
+                //Min köporder är slutförd och sätts som inaktiv samtidigt som säljordern delas upp. 
+                activeOrderManager.CompleteAndSplitOrder(myActiveOrder,matchingOrders[i]);
+               //Sparar transaktionen till db. 
+               stockTransactionManager.SaveStockTransactionToDataBase(myStockTransactions[i]);
+                //For loopen avslutas. 
                 break; 
             }
-           
+
+            //Är min köporder större betyder det att jag behöver köpa från ytterligare en order. 
+            else
+            {
+                //Istället blir den första säljordern slutförd och behöver sparas till databasen. 
+                //Min köporder behöver nu splittas upp. 
+                activeOrderManager.CompleteAndSplitOrder(matchingOrders[i],myActiveOrder);
+                myActiveOrder.Amount = myActiveOrder.Amount - matchingOrders[i].Amount;
+                //Sparar transaktionen till DB. 
+                stockTransactionManager.SaveStockTransactionToDataBase(myStockTransactions[i]);
+            }
+           //Loopen börjar om. 
         }
         }
       
@@ -57,7 +71,7 @@ class LoggedInUserGUI
    
 
 
-        string header = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}", "Id", "Ticker", "Name", "Sector", "List", "Highest Buy", "Lowest Sell", "Last sold for");
+       /* string header = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}", "Id", "Ticker", "Name", "Sector", "List", "Highest Buy", "Lowest Sell", "Last sold for");
         Console.WriteLine(header);
         foreach (var stockAccount in loggedInCustomer.CustomerStockAccounts)
         {
@@ -68,7 +82,7 @@ class LoggedInUserGUI
                 Console.WriteLine($"{content}");
             }
         }
-
+        */
     }
     
     public void PrintStockAccountInfo(List<StockAccount> customerStockAccounts)
