@@ -28,9 +28,50 @@ class ActiveOrderDB : DBConnection
 
     public void CloseActiveOrder(int orderId)
     {
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id",orderId);
 
+        string query = "UPDATE active_orders SET is_active = 0 WHERE id = @Id;";
+
+         using (var connection = DBConnect())
+        {
+            try
+            {
+                connection.Execute(query, parameters);
+                
+            }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+        }
+        
     }
 
+
+
+     public void UpdateAmountInActiveOrder(int orderId,int newAmount)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id",orderId);
+        parameters.Add("@Amount",newAmount);
+
+        string query = "UPDATE active_orders SET amount = @Amount WHERE id = @Id;";
+
+         using (var connection = DBConnect())
+        {
+            try
+            {
+                connection.Execute(query, parameters);
+                
+            }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+        }
+        
+    }
     public List<ActiveOrder> GetAllActiveOrders() //TODO dynamic parameters
     {
 

@@ -22,17 +22,36 @@ class StockTransactionManager
         }
         else stockTransaction.PricePerStock = buyOrder.PricePerStock;
 
+        //Kollar så att antalet aktier i köporder matchar i säljorder. 
         if (buyOrder.Amount == sellOrder.Amount)
         {
             stockTransaction.Amount = buyOrder.Amount;
         }
         
-        else if (true)
+        //
+        else if (buyOrder.Amount>sellOrder.Amount)
         {
-            
+            stockTransaction.Amount = sellOrder.Amount;
+
+           buyOrder.Amount = buyOrder.Amount - sellOrder.Amount;
+           CreateOverFlowOrder(buyOrder);
+            //TODO Använda delegater här istället?
+        }
+
+        else
+        {
+            stockTransaction.Amount = buyOrder.Amount;
+            sellOrder.Amount = sellOrder.Amount - buyOrder.Amount;
+           CreateOverFlowOrder(sellOrder);
         }
 
         return stockTransaction;
     }
 
+    public void CreateOverFlowOrder (ActiveOrder activeOrder)
+    {
+        ActiveOrderDB activeOrderDB = new ActiveOrderDB();
+        activeOrderDB.CreateActiveOrder(activeOrder);
+
+    }
 }
