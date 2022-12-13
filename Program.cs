@@ -70,8 +70,7 @@
             Console.WriteLine($"{content}");
         }
 
-        ActiveOrder myBuyOrder = CreateActiveBuyOrderObject();
-        hejhej.CreateActiveOrder(myBuyOrder);
+       
 
     }
         static ActiveOrder CreateActiveBuyOrderObject()

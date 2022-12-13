@@ -52,8 +52,7 @@ class LoggedInUserGUI
                 //Nu vet vi att säljordern kan uppfyllas helt. 
                 //Vi sätter säljOrdern till inaktiv. 
                 activeOrderDB.CloseActiveOrder(matchingOrders[0].Id);
-
-                
+  
                 ActiveOrder myFullFilledOrder = new();
                 //Skapar en kopia av min aktiva köporder. 
                 myFullFilledOrder = myActiveOrder;
@@ -67,9 +66,19 @@ class LoggedInUserGUI
                 int newAmount = activeAmount - matchingOrders[0].Amount;
                 activeOrderDB.UpdateAmountInActiveOrder(myActiveOrder.Id,newAmount);
                 myActiveOrder.Amount = newAmount;
+
+                //Slutligen sparar vi ordrarna i en stock transaktion in i databasen. 
+                StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder,matchingOrders[0]);
+                stockTransactionManager.SaveStockTransactionToDataBase(stockTransaction);
+
+                //Efter transaktionen ska pengar byta ägare. 
+                stockTransactionManager.StockTransactionToStockAccount(stockTransaction);
+                //Slutligen ska aktierna byta ägare. 
+                stockTransactionManager.StockTransactionToStocksToAccount(stockTransaction);
+                
             }
 
-            else //Är antalet på säljordern större än köpordern. 
+            else if ((myActiveOrder.Amount<matchingOrders[0].Amount)) //Är antalet på säljordern större än köpordern. 
             {
                 int activeAmount = matchingOrders[0].Amount;
                 //Nu vet vi att köpordern kan uppfyllas helt. 
@@ -89,9 +98,39 @@ class LoggedInUserGUI
                 //Nu måste vi ändra antalet på den säljordern som är kvar i DB. 
                 int newAmount = activeAmount - sellerFullFilledOrder.Amount;
                 activeOrderDB.UpdateAmountInActiveOrder(sellerFullFilledOrder.Id,newAmount);
+                
+                //Spara ner stock transaktion i databasen. 
+               
+                 StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder,sellerFullFilledOrder);
+                stockTransactionManager.SaveStockTransactionToDataBase(stockTransaction);
+
+                //Efter transaktionen ska pengar byta ägare. 
+                stockTransactionManager.StockTransactionToStockAccount(stockTransaction);
+                //Slutligen ska aktierna byta ägare. 
+                stockTransactionManager.StockTransactionToStocksToAccount(stockTransaction);
+                //Se till att pengar och aktier byter ägare utifrån ett transaction object. 
                
             }
 
+            else //Antal på köp och sälj är lika stora. 
+            {
+                //Båda ordrarna kan sättas som inaktiva i databasen.
+                //Börjar med vår köporder
+                activeOrderDB.CloseActiveOrder(myActiveOrder.Id);
+                //Sen säljordern. 
+                activeOrderDB.CloseActiveOrder(matchingOrders[0].Id);
+
+                 StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder,matchingOrders[0]);
+                stockTransactionManager.SaveStockTransactionToDataBase(stockTransaction);
+
+                //Efter transaktionen ska pengar byta ägare. 
+                stockTransactionManager.StockTransactionToStockAccount(stockTransaction);
+                //Slutligen ska aktierna byta ägare. 
+                stockTransactionManager.StockTransactionToStocksToAccount(stockTransaction);
+                //Se till att pengar och aktier byter ägare utifrån ett transaction object. 
+
+
+            }
         }
 
         }
