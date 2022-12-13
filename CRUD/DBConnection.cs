@@ -1,7 +1,6 @@
 
 using MySqlConnector;
 
-
  public class DBConnection
 {
       //Parent class that handles the server and user/pw for the database connection

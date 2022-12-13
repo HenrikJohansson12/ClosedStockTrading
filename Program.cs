@@ -17,7 +17,7 @@
         Console.WriteLine(_activeOrderDB.GetLowestActiveSellPrice(5));
 
 
-        Console.WriteLine("Välkommen till STOCK TECH \n[1] Logga in\n[2]Registrera ny kund");
+        Console.WriteLine("Välkommen till STOCK TECH \n[1] Logga in\n[2] Registrera ny kund (Inte tillgänglig)");
 
         if (Console.ReadKey(true).KeyChar == '1')
         {
@@ -45,22 +45,6 @@
 
         }
 
-
-
-
-    
-
-   
-
-        
-        
-
-
-
-
-
-
-
         string header = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-10}", "Id", "Ticker", "Name", "Sector", "List");
         Console.WriteLine(header);
         foreach (var stock in Stocks)
@@ -73,24 +57,5 @@
        
 
     }
-        static ActiveOrder CreateActiveBuyOrderObject()
-        {
-            ActiveOrder myBuyOrder = new();
-            myBuyOrder.IsBuyOrder = true;
-            myBuyOrder.IsActive = true;
-            Console.WriteLine("Vilken aktie vill du köpa");
-            myBuyOrder.StockId = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Hur många vill du köpa");
-            myBuyOrder.Amount = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Till vilket pris?");
-            myBuyOrder.PricePerStock = Convert.ToDouble(Console.ReadLine());
-            myBuyOrder.OrderTimeStamp = DateTime.Now;
-
-            myBuyOrder.AccountId = 3;
-
-            return myBuyOrder;
-
-
-        }
-    
+  
 }

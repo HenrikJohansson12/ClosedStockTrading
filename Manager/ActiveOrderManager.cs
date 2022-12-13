@@ -1,31 +1,43 @@
 class ActiveOrderManager
 {
-    public List<ActiveOrder> GetCompatibleSellOrders(ActiveOrder myActiveOrder)
+    public ActiveOrder GetCompatibleSellOrder(ActiveOrder myActiveOrder)
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
-         bool isBuyOrder = false;
-        //Ordern vi ska kolla ska vara motsatsen mot ordern som precis lagts. 
-        if (myActiveOrder.IsBuyOrder == true)
+        //Vi hämtar en sorterad lista med matchande ordrar.         
+        compatibleOrders = activeOrderDB.GetCompatibleSellOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
+        //Är listan tom returerar vi null. 
+        if (compatibleOrders.Count == 0)
         {
-           isBuyOrder = false;
+            return null;
         }
-        compatibleOrders = activeOrderDB.GetAllCompatableActiveOrders(isBuyOrder,myActiveOrder.StockId,myActiveOrder.PricePerStock);
 
-        //Om vi letar efter en köporder sorterar vi listan efter den äldsta köpordern. 
-        if (isBuyOrder == true)
-        {
-            compatibleOrders.OrderBy(x=>x.OrderTimeStamp);
-        }
-        //Letar vi efter en säljorder vill vi köpa av den som säljer för lägst pris. 
         else
-        {
-            compatibleOrders.OrderBy(x=>x.PricePerStock); //TODO FUNKAR JU INTE
+        {   //Finns det något i listan så returnerar vi det första objektet. 
+            ActiveOrder compatibleOrder = compatibleOrders[0];
+            return compatibleOrder;
         }
-
-       return compatibleOrders;
-    
+ 
     } 
 
+ public ActiveOrder GetCompatibleBuyOrder(ActiveOrder myActiveOrder)
+    {
+        ActiveOrderDB activeOrderDB = new();
+        List<ActiveOrder> compatibleOrders = new();
+        //Vi hämtar en sorterad lista med matchande ordrar.         
+        compatibleOrders = activeOrderDB.GetCompatibleSellOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
+        //Är listan tom returerar vi null. 
+        if (compatibleOrders.Count == 0)
+        {
+            return null;
+        }
+
+        else
+        {   //Finns det något i listan så returnerar vi det första objektet. 
+            ActiveOrder compatibleOrder = compatibleOrders[0];
+            return compatibleOrder;
+        }
+ 
+    } 
 
 }

@@ -95,28 +95,17 @@ class ActiveOrderDB : DBConnection
         }
     }
 
-    public List<ActiveOrder> GetAllCompatableActiveOrders(bool isBuyOrder, int stockId, double pricePerStock)
+    public List<ActiveOrder> GetCompatibleSellOrders(int stockId, double pricePerStock)
     {
-        string sign;       
-        //Letar vi efter en köporder måste priset vara större än eller lika med det vi säljer för.      
-        if (isBuyOrder == true) 
-        {
-        sign = ">=";
-        }
-        else sign = "<=";
-
-
+        //Vi letar efter en säljorder och vi vill sortera på de som vill sälja billigast först. 
         var parameters = new DynamicParameters();
-        parameters.Add("@IsBuyOrder", isBuyOrder);
         parameters.Add("@StockId", stockId);
         parameters.Add("@PricePerStock", pricePerStock);
-        parameters.Add("@Sign", sign);
-
-
-
+       
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
          "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
-         "WHERE is_active = true AND is_buy_order = @IsBuyOrder AND stock_id = @StockId AND price_per_stock <= @PricePerStock;";
+         "WHERE is_active = true AND is_buy_order = false AND stock_id = @StockId AND price_per_stock <= @PricePerStock"+
+         " ORDER BY price_per_stock ASC;";
 
         using (var connection = DBConnect())
         {
