@@ -25,49 +25,76 @@ class LoggedInUserGUI
         //Skapa objektet av indata. 
         ActiveOrder myActiveOrder = CreateActiveBuyOrderObject();
         //Spara i databasen och returnera dess ID. 
-        myActiveOrder.Id = activeOrderDB.CreateActiveOrder(myActiveOrder);
-        //Hämta en lista med kompatibla ordrar. 
-        List<ActiveOrder> matchingOrders = activeOrderManager.LookForCompatibleOrdersAfterPlacingOrder(myActiveOrder);
+        int myOrderId= activeOrderDB.CreateActiveOrder(myActiveOrder);
+        while (true)
+        {
+        
+         myActiveOrder = activeOrderDB.GetActiveOrderById(myOrderId); 
+        
+        if (myActiveOrder.IsActive == false)
+        {
+            
+            Console.WriteLine("Nu ska loopen avslutas");
+            break;
+        }  
+        
+       
+        //Hämtar en sorterad lista med kompatibla ordrar. 
+        List<ActiveOrder> matchingOrders = activeOrderManager.GetCompatibleSellOrders(myActiveOrder);
         
         //Ifall jag köper. 
         if (myActiveOrder.IsBuyOrder == true)
         {
-                        
-             for (int i = 0; i < matchingOrders.Count; i++)
-             {       
-            //Skapar en stocktransaction object och lägger till i listan. 
-            myStockTransactions.Add(stockTransactionManager.CreateStockTransactionObject(myActiveOrder,matchingOrders[i]));
-            
-          //kollar ifall antalet på säljordern är större än antalet på köpordern. 
-            if (matchingOrders[i].Amount>myActiveOrder.Amount)
-            {   
-                //Min köporder är slutförd och sätts som inaktiv samtidigt som säljordern delas upp. 
-                activeOrderManager.CompleteAndSplitOrder(myActiveOrder,matchingOrders[i]);
-               //Sparar transaktionen till db. 
-               stockTransactionManager.SaveStockTransactionToDataBase(myStockTransactions[i]);
-                //For loopen avslutas. 
-                break; 
-            }
-
-            //Är min köporder större betyder det att jag behöver köpa från ytterligare en order. 
-            else
+            //Kollar ifall antalet på köpordern är större än säljordern. 
+            if (myActiveOrder.Amount>matchingOrders[0].Amount)
             {
-                //Istället blir den första säljordern slutförd och behöver sparas till databasen. 
-                //Min köporder behöver nu splittas upp. 
-                activeOrderManager.CompleteAndSplitOrder(matchingOrders[i],myActiveOrder);
-                myActiveOrder.Amount = myActiveOrder.Amount - matchingOrders[i].Amount;
-                //Sparar transaktionen till DB. 
-                stockTransactionManager.SaveStockTransactionToDataBase(myStockTransactions[i]);
+                int activeAmount = myActiveOrder.Amount;
+                //Nu vet vi att säljordern kan uppfyllas helt. 
+                //Vi sätter säljOrdern till inaktiv. 
+                activeOrderDB.CloseActiveOrder(matchingOrders[0].Id);
+
+                
+                ActiveOrder myFullFilledOrder = new();
+                //Skapar en kopia av min aktiva köporder. 
+                myFullFilledOrder = myActiveOrder;
+                //Ändrar antalet i köp-ordern till det som gick till avslut i säljordern så dom matchar. 
+                myFullFilledOrder.Amount = matchingOrders[0].Amount;
+                myFullFilledOrder.IsActive = false;
+                //Sparar i Databasen. 
+                activeOrderDB.CreateActiveOrder(myFullFilledOrder);
+
+                //Nu måste vi ändra antalet på den köpordern som är kvar i DB. 
+                int newAmount = activeAmount - matchingOrders[0].Amount;
+                activeOrderDB.UpdateAmountInActiveOrder(myActiveOrder.Id,newAmount);
+                myActiveOrder.Amount = newAmount;
             }
-           //Loopen börjar om. 
+
+            else //Är antalet på säljordern större än köpordern. 
+            {
+                int activeAmount = matchingOrders[0].Amount;
+                //Nu vet vi att köpordern kan uppfyllas helt. 
+                //Vi sätter vår köporder till inaktiv. 
+                activeOrderDB.CloseActiveOrder(myActiveOrder.Id);
+
+                
+                ActiveOrder sellerFullFilledOrder = new();
+                //Skapar en kopia av säljordern. 
+                sellerFullFilledOrder = matchingOrders[0];
+                //Ändrar antalet i sälj-ordern till det som gick till avslut i KÖPordern så dom matchar. 
+                sellerFullFilledOrder.Amount = myActiveOrder.Amount;
+                sellerFullFilledOrder.IsActive = false;
+                //Sparar i Databasen. 
+                activeOrderDB.CreateActiveOrder(sellerFullFilledOrder);
+
+                //Nu måste vi ändra antalet på den säljordern som är kvar i DB. 
+                int newAmount = activeAmount - sellerFullFilledOrder.Amount;
+                activeOrderDB.UpdateAmountInActiveOrder(sellerFullFilledOrder.Id,newAmount);
+               
+            }
+
         }
+
         }
-      
-
-
-
-
-
    
 
 

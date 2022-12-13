@@ -1,6 +1,6 @@
 class ActiveOrderManager
 {
-    public List<ActiveOrder> LookForCompatibleOrdersAfterPlacingOrder(ActiveOrder myActiveOrder)
+    public List<ActiveOrder> GetCompatibleSellOrders(ActiveOrder myActiveOrder)
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
@@ -10,8 +10,6 @@ class ActiveOrderManager
         {
            isBuyOrder = false;
         }
-        else isBuyOrder = true;
-        
         compatibleOrders = activeOrderDB.GetAllCompatableActiveOrders(isBuyOrder,myActiveOrder.StockId,myActiveOrder.PricePerStock);
 
         //Om vi letar efter en köporder sorterar vi listan efter den äldsta köpordern. 
@@ -22,14 +20,14 @@ class ActiveOrderManager
         //Letar vi efter en säljorder vill vi köpa av den som säljer för lägst pris. 
         else
         {
-            compatibleOrders.OrderByDescending(x=>x.PricePerStock);
+            compatibleOrders.Sort(); //TODO FUNKAR JU INTE
         }
 
        return compatibleOrders;
     
     } 
 
-    public void CompleteAndSplitOrder(ActiveOrder completedOrder,ActiveOrder splitOrder)
+    public ActiveOrder  CompleteAndSplitOrder(ActiveOrder completedOrder,ActiveOrder splitOrder)
     {
         ActiveOrderDB activeOrderDB = new();
         //Först sätta completedOrder som slutförd. 
@@ -42,7 +40,9 @@ class ActiveOrderManager
         splitOrder.Amount = completedOrder.Amount;
         splitOrder.IsActive = false;
         //Sparar objektet i DB. 
-        activeOrderDB.CreateActiveOrder(splitOrder);        
+      splitOrder.Id = activeOrderDB.CreateActiveOrder(splitOrder); 
+      return splitOrder;
+               
 
     }
 }

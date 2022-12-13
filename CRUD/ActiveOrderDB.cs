@@ -192,11 +192,36 @@ class ActiveOrderDB : DBConnection
                 else return lowestActiveSellPrice = 0;
             }
 
-            catch (System.Data.DataException n)
+            catch (System.Data.DataException)
             {
                 double returnvalue = 0;
                 return returnvalue;
             }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
+
+
+     public ActiveOrder GetActiveOrderById(int id)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("@Id",id);
+        string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "WHERE id = @Id;";
+
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                ActiveOrder result = connection.QuerySingle<ActiveOrder>(query,parameters);
+                return result;
+            }
+
             catch (System.Exception e)
             {
                 throw e;
