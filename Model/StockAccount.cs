@@ -11,5 +11,14 @@ class StockAccount
 
     public List <Stock> OwnedStocks { get; set; }
 
+    public double TotalStockValue { get; set; }
 
+
+    public void RefreshTotalStockValue()
+    {
+        foreach (var stock in OwnedStocks)
+        {
+            TotalStockValue = TotalStockValue+(stock.LastKnownPrice*stock.AmountOnCustomerAccount);
+        }
+    }
 }
