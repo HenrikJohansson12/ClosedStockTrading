@@ -4,6 +4,7 @@ class LoggedInUserGUI
     {   //Laddar in den inloggade kundens konton samt aktier tillhörande dessa konton. 
         loggedInCustomer.CustomerStockAccounts =LoadCustomerAccounts(loggedInCustomer.Id);
         loggedInCustomer.CustomerStockAccounts = LoadCustomerStocks(loggedInCustomer.CustomerStockAccounts);
+        
 
         Console.WriteLine($"Välkommen {loggedInCustomer.Name}\n\n");
 
@@ -11,11 +12,31 @@ class LoggedInUserGUI
 
         PrintStockAccountInfo(loggedInCustomer.CustomerStockAccounts);
 
-        
-        int accountId = 3;
+        int accountSelect = Convert.ToInt32(Console.ReadLine());
+        int accountId = loggedInCustomer.CustomerStockAccounts[accountSelect-1].Id;
+        StockAccount selectedStockAccount = new ();
+        selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect-1];
 
-        CreateBuyOrder(accountId);
         
+        while (true)
+        {                
+        Console.WriteLine("[1] Se aktier på kontot");
+        Console.WriteLine("[2] Köpa aktier");
+        Console.WriteLine("[3] Sälja aktier");
+        Console.WriteLine("[4] Se aktiva ordrar");
+        Console.WriteLine("[5] Se historik");
+        var keypress = Console.ReadKey(true).KeyChar;
+        switch (keypress)
+        {
+            case '1': PrintCustomerStocksOnAccount(selectedStockAccount); break;
+                           
+            case '2': CreateBuyOrder(accountId); break;
+          
+            case '3': CreateSellOrder(selectedStockAccount); break;
+
+            default: break;
+        }
+        }
         //Här printa kontoinfo samt möjlighet att välja ett konto. 
 
         //När man valt konto ska man kunna göra följande. 
@@ -54,8 +75,58 @@ class LoggedInUserGUI
         }
         */
     }
-    public void CreateSellOrder ()
+    public void CreateSellOrder (StockAccount selectedStockAccount)
+    {  
+        SellOrderManager sellOrderManager = new();
+        ActiveOrder mySellOrder = new();
+        bool closedTransaction;
+        bool successfulObjectCreated = false;
+        
+     while (successfulObjectCreated == false)
     {
+        //Visa alla aktier som går att sälja. 
+       PrintCustomerStocksOnAccount(selectedStockAccount);
+        int stockId, amount;
+        double pricePerStock;
+
+        Console.WriteLine("Ange ID på den aktie du vill sälja");
+        stockId = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Ange vilket pris du vill sälja för");
+        pricePerStock = Convert.ToDouble(Console.ReadLine());
+        System.Console.WriteLine("Hur många vill du sälja?");
+        amount = Convert.ToInt32(Console.ReadLine());
+
+        
+        mySellOrder.IsBuyOrder = false;
+        mySellOrder.IsActive = true;
+       //TODO är nog snyggare att använda constructor i klassen. 
+        mySellOrder.StockId = stockId;
+        mySellOrder.Amount = amount;
+        mySellOrder.PricePerStock = pricePerStock;
+        mySellOrder.OrderTimeStamp = DateTime.Now;
+        mySellOrder.AccountId = selectedStockAccount.Id; 
+        //Kollar så stockId och amount finns på kundens konto. 
+       foreach (var stock in selectedStockAccount.OwnedStocks)
+       {
+            if (stock.Id == mySellOrder.StockId && stock.AmountOnCustomerAccount>=mySellOrder.Amount== true)
+            {
+                
+                successfulObjectCreated = true;
+                break;
+            }
+         
+       }
+         System.Console.WriteLine("Aktien finns inte på ditt konto eller du försöker sälja fler än du äger");
+
+    }
+
+   closedTransaction = sellOrderManager.FullFillSellOrder(mySellOrder);
+   if (closedTransaction)
+   {
+    Console.WriteLine("Din säljorder gick till avslut");
+   }
+   else System.Console.WriteLine("Din order gick inte till avslut");
+
         //Printa alla aktier som finns på kontot. 
     }
     public void CreateBuyOrder (int accountId)
@@ -78,11 +149,12 @@ class LoggedInUserGUI
 
     public void PrintStockAccountInfo(List<StockAccount> customerStockAccounts)
     {   
-        Console.WriteLine(string.Format("{0,-5} {1,-20} {2,-15} {3,-15} {4,-15}","Id","Account name","Stock value","Cash","Total value"));
+        Console.WriteLine(string.Format("{0,-5} {1,-25} {2,-15} {3,-10} {4,-15}","Id","Account name","Stock value","Cash","Total value"));
         int stockAccountIndex = 1;
         foreach (var stockAccount in customerStockAccounts)
-        {
-            Console.WriteLine(string.Format("{0,-5} {1,-20} {2,-15} {3,-15} {4,-15}",stockAccountIndex,stockAccount.AccountName,stockAccount.TotalStockValue,stockAccount.BalanceInSek,stockAccount.TotalStockValue+stockAccount.BalanceInSek));
+        {   stockAccount.RefreshTotalStockValue();
+            Console.WriteLine(string.Format("{0,-5} {1,-25} {2,-15} {3,-10} {4,-15}",stockAccountIndex,stockAccount.AccountName,stockAccount.TotalStockValue,stockAccount.BalanceInSek,stockAccount.TotalStockValue+stockAccount.BalanceInSek));
+            stockAccountIndex ++;
         }
 
     }
@@ -100,14 +172,15 @@ class LoggedInUserGUI
     {   StockDB stockDB = new();
         ActiveOrderDB activeOrderDB = new();
         ListingDB listingDB = new();
-
+        StockTransactionDB stockTransactionDB = new();
         List<Stock> stocks = stockDB.ReadAllStocks();
         stocks = listingDB.SetListingName(stocks);
         
         foreach (var stock in stocks)
             {
                 stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
-                stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);              
+                stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);
+                stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);           
             }
 
         Console.WriteLine(string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}", "Id", "Ticker", "Name", "Sector", "List", "Highest Buy", "Lowest Sell", "Last sold for"));
@@ -118,11 +191,31 @@ class LoggedInUserGUI
                 string content = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}",
                 stock.Id, stock.Ticker, stock.Name, stock.Sector, stock.ListingName, stock.HighestActiveBuyPrice, stock.LowestActiveSellPrice, stock.LastKnownPrice);
                 Console.WriteLine($"{content}");
-            }
-        
-        
-     
+            }           
     }
+     public void PrintCustomerStocksOnAccount(StockAccount stockAccount)
+    {   
+        ActiveOrderDB activeOrderDB = new();
+        StockTransactionDB stockTransactionDB = new();
+        
+        foreach (var stock in stockAccount.OwnedStocks)
+            {
+                stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
+                stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);  
+                stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);             
+            }
+
+        Console.WriteLine(string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-6} {6,-15} {7,-15} {8,-15}", "Id", "Ticker", "Name", "Sector", "List","Amount", "Highest Buy", "Lowest Sell", "Last sold for"));
+        
+        
+            foreach (var stock in stockAccount.OwnedStocks)
+            {
+                string content = string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-6} {6,-15} {7,-15} {8,-15}",
+                stock.Id, stock.Ticker, stock.Name, stock.Sector, stock.ListingName,stock.AmountOnCustomerAccount, stock.HighestActiveBuyPrice, stock.LowestActiveSellPrice, stock.LastKnownPrice);
+                Console.WriteLine($"{content}");
+            }           
+    }
+
     public List<StockAccount> LoadCustomerStocks(List<StockAccount> customerStockAccounts)
     {
         StockDB stockDB = new();

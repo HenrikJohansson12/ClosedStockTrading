@@ -24,4 +24,26 @@ class StockTransactionDB : DBConnection
             }
         }
     }
+
+    public double GetLatestStockTransactionPrice(int stockId)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add(@"StockId",stockId);
+        //Returnerar endast priset på den senaste ordern som gick till avslut. 
+        string query = "SELECT price_per_stock FROM stock_transactions WHERE stock_id = @StockId "+
+        " AND transaction_time = ( SELECT MAX(transaction_time) FROM stock_transactions );";
+
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                double latestStockTransactionPrice = connection.ExecuteScalar<double>(query, parameters);
+                return latestStockTransactionPrice;
+            }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+        }
+    }
 }
