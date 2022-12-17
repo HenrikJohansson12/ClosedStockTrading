@@ -1,6 +1,6 @@
 class StockTransactionManager
 {
-    
+    //TODO dela upp den här metoden i två. 
     public StockTransaction CreateStockTransactionObject(ActiveOrder buyOrder, ActiveOrder sellOrder)
     {   
         

@@ -123,6 +123,35 @@ class ActiveOrderDB : DBConnection
         }
     }
 
+
+     public List<ActiveOrder> GetCompatibleBuyOrders(int stockId, double pricePerStock)
+    {
+        //Vi letar efter en köporder så kollar vi så att priset är mindre eller lika med köparens pris. 
+        //Säljaren kommer få sitt efterfrågade pris oavsett vilken order vi säljer så vi sorterar på äldsta först så blir det rättvist. 
+        var parameters = new DynamicParameters();
+        parameters.Add("@StockId", stockId);
+        parameters.Add("@PricePerStock", pricePerStock);
+       
+        string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "WHERE is_active = true AND is_buy_order = true AND stock_id = @StockId AND price_per_stock >= @PricePerStock"+
+         " ORDER BY order_date_time ASC;";
+
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query,parameters).ToList();
+                return compatableOrders;
+            }
+
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
     public double GetHighestActiveBuyPrice(int stockId)
     {
         var parameters = new DynamicParameters();

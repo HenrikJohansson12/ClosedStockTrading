@@ -116,7 +116,8 @@ class LoggedInUserGUI
             }
          
        }
-         System.Console.WriteLine("Aktien finns inte på ditt konto eller du försöker sälja fler än du äger");
+         
+        if (successfulObjectCreated == false) System.Console.WriteLine("Aktien finns inte på ditt konto eller du försöker sälja fler än du äger");
 
     }
 
@@ -127,7 +128,7 @@ class LoggedInUserGUI
    }
    else System.Console.WriteLine("Din order gick inte till avslut");
 
-        //Printa alla aktier som finns på kontot. 
+       
     }
     public void CreateBuyOrder (int accountId)
     {

@@ -25,7 +25,7 @@ class ActiveOrderManager
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
         //Vi hämtar en sorterad lista med matchande ordrar.         
-        compatibleOrders = activeOrderDB.GetCompatibleSellOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
+        compatibleOrders = activeOrderDB.GetCompatibleBuyOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
         //Är listan tom returerar vi null. 
         if (compatibleOrders.Count == 0)
         {
