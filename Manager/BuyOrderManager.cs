@@ -45,14 +45,14 @@ class BuyOrderManager
                 //Vi sätter säljOrdern till inaktiv. 
                 activeOrderDB.CloseActiveOrder(matchingOrder.Id);
 
-                ActiveOrder myFullFilledOrder = new();
+                ActiveOrder myFullFilledBuyOrder = new();
                 //Skapar en kopia av min aktiva köporder. 
-                myFullFilledOrder = myActiveOrder;
+                myFullFilledBuyOrder = myActiveOrder;
                 //Ändrar antalet i köp-ordern till det som gick till avslut i säljordern så dom matchar. 
-                myFullFilledOrder.Amount = matchingOrder.Amount;
-                myFullFilledOrder.IsActive = false;
+                myFullFilledBuyOrder.Amount = matchingOrder.Amount;
+                myFullFilledBuyOrder.IsActive = false;
                 //Sparar i Databasen. 
-                activeOrderDB.CreateActiveOrder(myFullFilledOrder);
+                activeOrderDB.CreateActiveOrder(myFullFilledBuyOrder);
 
                 //Nu måste vi ändra antalet på den köpordern som är kvar i DB. 
                 int newAmount = activeAmount - matchingOrder.Amount;
@@ -60,7 +60,7 @@ class BuyOrderManager
                 myActiveOrder.Amount = newAmount;
 
                 //Slutligen sparar vi ordrarna i en stock transaktion in i databasen. 
-                StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(myActiveOrder, matchingOrder);
+                StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(myFullFilledBuyOrder, matchingOrder);
                 stockTransactionManager.SaveStockTransactionToDataBase(stockTransaction);
 
                 //Efter transaktionen ska pengar byta ägare. 

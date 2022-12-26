@@ -60,7 +60,7 @@ class SellOrderManager
                 mySellOrder.Amount = newAmount;
 
                 //Slutligen sparar vi ordrarna i en stock transaktion in i databasen. 
-                StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(matchingBuyOrder, mySellOrder);
+                StockTransaction stockTransaction = stockTransactionManager.CreateStockTransactionObject(matchingBuyOrder, myFullFilledSellOrder);
                 stockTransactionManager.SaveStockTransactionToDataBase(stockTransaction);
 
                 //Efter transaktionen ska pengar byta ägare. 

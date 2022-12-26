@@ -1,6 +1,6 @@
 class StockTransactionManager
 {
-    //TODO dela upp den här metoden i två. 
+    
     public StockTransaction CreateStockTransactionObject(ActiveOrder buyOrder, ActiveOrder sellOrder)
     {   
         
@@ -16,39 +16,14 @@ class StockTransactionManager
         stockTransaction.SellerCourtage = 0;
 
         stockTransaction.TransactionTime = DateTime.Now;
-
-        // Är köppriset högre än säljspriset används säljpriset. 
-        if (buyOrder.PricePerStock>sellOrder.PricePerStock)
-        {
-            stockTransaction.PricePerStock = sellOrder.PricePerStock;
-        }
-        else stockTransaction.PricePerStock = buyOrder.PricePerStock;
-
-        //Kollar så att antalet aktier i köporder matchar i säljorder. 
-        if (buyOrder.Amount == sellOrder.Amount)
-        {
-            stockTransaction.Amount = buyOrder.Amount;
-        }
+        //Säljpriset är det som används
+        stockTransaction.PricePerStock = sellOrder.PricePerStock;
         
-        //Den ordern som har minst antal blir den som hamnar på transaktionen
-        else if (buyOrder.Amount>sellOrder.Amount)
-        {
-            stockTransaction.Amount = sellOrder.Amount;
-
-           
-          
-            //TODO Använda delegater här istället?
-        }
-
-        else
-        {
-            stockTransaction.Amount = buyOrder.Amount;
-        
-           
-        }
+       stockTransaction.Amount = buyOrder.Amount;
 
         return stockTransaction;
     }
+
 
     public int SaveStockTransactionToDataBase (StockTransaction myStockTransaction)
     {
