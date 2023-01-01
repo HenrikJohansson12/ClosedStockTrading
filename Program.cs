@@ -12,10 +12,10 @@
             bool runLoop = true;
             while (runLoop == true)
             {
-                //  System.Console.WriteLine("Ange personnummer");
-                string personalNumber = "19991231-1234";
-                //  System.Console.WriteLine("Ange lösenord");
-                string password = "password";
+                 System.Console.WriteLine("Ange personnummer");
+                string personalNumber = Console.ReadLine();
+                System.Console.WriteLine("Ange lösenord");
+                string password = Console.ReadLine();
 
                 if (customerDB.CustomerLogIn(personalNumber, password) != null)
                 {

@@ -59,8 +59,8 @@ class StockTransactionDB : DBConnection
         var parameters = new DynamicParameters();
         parameters.Add(@"StockId",stockId);
         //Returnerar endast priset på den senaste ordern som gick till avslut. 
-        string query = "SELECT price_per_stock FROM stock_transactions WHERE stock_id = @StockId "+
-        " AND transaction_time = ( SELECT MAX(transaction_time) FROM stock_transactions );";
+        string query = "SELECT price_per_stock FROM stock_transactions  "+
+        " WHERE transaction_time = ( SELECT MAX(transaction_time) FROM stock_transactions WHERE stock_id = @StockId );";
 
         using (var connection = DBConnect())
         {

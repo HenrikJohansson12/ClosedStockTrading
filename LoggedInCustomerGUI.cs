@@ -2,10 +2,9 @@ class LoggedInCustomerGUI
 {
     public void MainMenu(Customer loggedInCustomer)
     {   //Laddar in den inloggade kundens konton samt aktier tillhörande dessa konton. 
-        loggedInCustomer.CustomerStockAccounts = LoadCustomerAccounts(loggedInCustomer.Id);
-        loggedInCustomer.CustomerStockAccounts = LoadCustomerStocks(loggedInCustomer.CustomerStockAccounts);
-        loggedInCustomer.CustomerStockAccounts = RefreshStockPrices(loggedInCustomer.CustomerStockAccounts);
-
+       loggedInCustomer = RefreshCustomer(loggedInCustomer);
+        
+        Console.Clear();
         Console.WriteLine($"Välkommen {loggedInCustomer.Name}\n\n");
 
         while (true)
@@ -22,7 +21,10 @@ class LoggedInCustomerGUI
             bool menuLoop = true;
 
             while (menuLoop == true)
-            {
+            {   
+               loggedInCustomer = RefreshCustomer(loggedInCustomer);
+               selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect-1];
+
                 Console.WriteLine("\n\n");
                 Console.WriteLine("[1] Se aktier på kontot");
                 Console.WriteLine("[2] Köpa aktier");
@@ -55,6 +57,14 @@ class LoggedInCustomerGUI
 
     }
 
+    public Customer RefreshCustomer(Customer loggedInCustomer)
+    {
+        loggedInCustomer.CustomerStockAccounts = LoadCustomerAccounts(loggedInCustomer.Id);
+        loggedInCustomer.CustomerStockAccounts = LoadCustomerStocks(loggedInCustomer.CustomerStockAccounts);
+        loggedInCustomer.CustomerStockAccounts = RefreshStockPrices(loggedInCustomer.CustomerStockAccounts);
+        return loggedInCustomer;
+        
+    }
 
     public void CreateSellOrder(StockAccount selectedStockAccount)
     {
