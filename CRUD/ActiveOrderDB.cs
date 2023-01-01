@@ -172,7 +172,7 @@ class ActiveOrderDB : DBConnection
             try
             {
                 double highestActiveBuyPrice = connection.QuerySingle<double>(query, parameters);
-                if (highestActiveBuyPrice != null) //TODO
+                if (highestActiveBuyPrice != null) 
                 {
                     return highestActiveBuyPrice;
                 }

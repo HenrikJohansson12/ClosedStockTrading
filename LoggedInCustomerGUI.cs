@@ -13,8 +13,9 @@ class LoggedInCustomerGUI
             Console.WriteLine("Här är dina konton. Välj ett konto för att gå vidare");
 
             PrintStockAccountInfo(loggedInCustomer.CustomerStockAccounts);
-
+            //Tar in en siffra från användaren
             int accountSelect = Convert.ToInt32(Console.ReadLine());
+            
             int accountId = loggedInCustomer.CustomerStockAccounts[accountSelect - 1].Id;
             StockAccount selectedStockAccount = new();
             selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect - 1];
@@ -147,7 +148,6 @@ class LoggedInCustomerGUI
         //Hämta lista med aktiekonton
         List<StockAccount> customerStockAccounts = stockAccountDB.GetCustomerStockAccountFromDataBase(customerId);
 
-
         return customerStockAccounts;
     }
 
@@ -225,7 +225,7 @@ class LoggedInCustomerGUI
                 stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
                 stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);
                 stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);
-                //Lägg även till här från historiken
+                
             }
         }
         return customerStockAccounts;

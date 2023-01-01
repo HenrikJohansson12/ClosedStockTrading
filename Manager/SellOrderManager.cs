@@ -10,6 +10,14 @@ class SellOrderManager
 
         //Spara i databasen och returnera dess ID. 
         int myOrderId = activeOrderDB.CreateActiveOrder(mySellOrder);
+       
+        //Får vi inte tillbaka nån matchande order så returnerar vi false. 
+           if (activeOrderManager.GetCompatibleBuyOrder(mySellOrder) == null)
+           {
+                return false; 
+           } 
+           else   
+           {
 
         //Startar en loop
         while (true)
@@ -24,18 +32,8 @@ class SellOrderManager
             }
 
 
-           //Får vi inte tillbaka nån matchande order så returnerar vi false. 
-           if (activeOrderManager.GetCompatibleBuyOrder(mySellOrder) == null)
-           {
-                return false; 
-           } 
-           else   
-           {
-           
-           
            matchingBuyOrder = activeOrderManager.GetCompatibleBuyOrder(mySellOrder);
-           
-
+        
 
             //Kollar ifall antalet på säljordern är större än köpordern. 
             if (mySellOrder.Amount > matchingBuyOrder.Amount)
