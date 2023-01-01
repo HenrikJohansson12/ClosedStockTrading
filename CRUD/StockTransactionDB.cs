@@ -25,6 +25,35 @@ class StockTransactionDB : DBConnection
         }
     }
 
+    public List<StockTransaction> GetAllStockTransactionsByAccountId(int accountId)
+    {
+        var parameters = new DynamicParameters ();
+        parameters.Add("@AccountId",accountId);
+        string query = "SELECT stock_transactions.id AS Id, buyer_account_id AS BuyerAccountId, seller_account_id AS SellerAccountId, "+
+        "price_per_stock AS PricePerStock, amount AS Amount, transaction_time AS TransactionTime, buyer_courtage AS BuyerCourtage, "+
+        "seller_courtage AS SellerCourtage, stock_id AS StockId, stocks.name AS StockName, listing.name AS ListingName "+
+        "FROM `stock_transactions` " +
+        "INNER JOIN stocks ON stocks.id = stock_id "+ 
+        "INNER JOIN listing ON stocks.listing_id = listing.id "+
+        "WHERE buyer_account_id = @AccountId OR seller_account_id = @AccountId;";
+
+        using (var connection = DBConnect())
+        {
+            try
+            {
+                var result = connection.Query<StockTransaction>(query,parameters).ToList();
+                return result;
+            }
+
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    
+    }
+
     public double GetLatestStockTransactionPrice(int stockId)
     {
         var parameters = new DynamicParameters();

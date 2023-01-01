@@ -10,7 +10,7 @@
         List<Stock> Stocks = stockDB.ReadAllStocks();
         Stocks = listingDB.SetListingName(Stocks);
         CustomerDB customerDB = new();
-        LoggedInUserGUI loggedInUserGUI = new();
+        LoggedInCustomerGUI loggedInUserGUI = new();
 
 
         Console.WriteLine(_activeOrderDB.GetHighestActiveBuyPrice(5));

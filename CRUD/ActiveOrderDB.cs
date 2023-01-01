@@ -72,18 +72,24 @@ class ActiveOrderDB : DBConnection
         }
 
     }
-    public List<ActiveOrder> GetAllActiveOrders()
-    {
+    public List<ActiveOrder> GetAllActiveOrdersByAccountId(int accountId)
+    {   //Innerjoinar stockName och listingName. 
+        var parameters = new DynamicParameters ();
+        parameters.Add("@AccountId",accountId);
+        string query = "SELECT active_orders.id AS Id, stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock, " +
+        "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive, stocks.name AS StockName, listing.name AS ListingName "+
+        "FROM active_orders "+
+        "INNER JOIN stocks ON stock_id = stocks.id "+
+        "INNER JOIN listing ON stocks.listing_id = listing.id"+
+        " WHERE is_active = true AND account_id = @AccountId;";
 
-        string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
-         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
-         "WHERE is_active = true;";
+       
 
         using (var connection = DBConnect())
         {
             try
             {
-                var result = connection.Query<ActiveOrder>(query).ToList();
+                var result = connection.Query<ActiveOrder>(query,parameters).ToList();
                 return result;
             }
 

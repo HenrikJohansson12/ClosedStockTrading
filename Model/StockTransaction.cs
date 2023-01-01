@@ -14,7 +14,8 @@ class StockTransaction
 
     public double BuyerTransactionSum { get; set; }
     public double SellerTransactionSum { get; set; }
-
+    public string StockName { get; set; }
+    public string ListingName { get; set; }
     public void CalculateTotalTransactionSum ()
     {
         BuyerTransactionSum = (-PricePerStock*Amount)-BuyerCourtage;
