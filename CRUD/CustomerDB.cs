@@ -25,7 +25,7 @@ class CustomerDB : DBConnection
 
                 catch (System.Exception e)
                 {
-                    throw e;
+                    
                     return null;
                 }
             }

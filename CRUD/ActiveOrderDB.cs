@@ -8,7 +8,7 @@ class ActiveOrderDB : DBConnection
         var parameters = new DynamicParameters(myActiveOrder);
 
         string query = "INSERT INTO active_orders (stock_id, account_id, price_per_stock, amount, is_buy_order," +
-        "order_date_time, is_active)" +
+        "order_time_stamp, is_active)" +
         "VALUES(@StockId, @AccountId, @PricePerStock, @Amount, @IsBuyOrder, @OrderTimeStamp, @IsActive);" +
         "SELECT MAX(id) FROM active_orders;";
 
@@ -77,7 +77,7 @@ class ActiveOrderDB : DBConnection
         var parameters = new DynamicParameters ();
         parameters.Add("@AccountId",accountId);
         string query = "SELECT active_orders.id AS Id, stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock, " +
-        "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive, stocks.name AS StockName, listing.name AS ListingName "+
+        "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive, stocks.name AS StockName, listing.name AS ListingName "+
         "FROM active_orders "+
         "INNER JOIN stocks ON stock_id = stocks.id "+
         "INNER JOIN listing ON stocks.listing_id = listing.id"+
@@ -109,7 +109,7 @@ class ActiveOrderDB : DBConnection
         parameters.Add("@PricePerStock", pricePerStock);
        
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
-         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
          "WHERE is_active = true AND is_buy_order = false AND stock_id = @StockId AND price_per_stock <= @PricePerStock"+
          " ORDER BY price_per_stock ASC;";
 
@@ -139,9 +139,9 @@ class ActiveOrderDB : DBConnection
         parameters.Add("@PricePerStock", pricePerStock);
        
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
-         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
          "WHERE is_active = true AND is_buy_order = true AND stock_id = @StockId AND price_per_stock >= @PricePerStock"+
-         " ORDER BY order_date_time ASC;";
+         " ORDER BY order_time_stamp ASC;";
 
         using (var connection = DBConnect())
         {
@@ -235,7 +235,7 @@ class ActiveOrderDB : DBConnection
         var parameters = new DynamicParameters();
         parameters.Add("@Id",id);
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
-         "amount AS Amount, is_buy_order AS IsBuyOrder, order_date_time AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
+         "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
          "WHERE id = @Id;";
 
         using (var connection = DBConnect())

@@ -24,7 +24,7 @@ class ListingDB : DBConnection
                 catch (System.Exception e)
                 {
                     throw e;
-                    return stocks;
+                    
                 }
             }
 

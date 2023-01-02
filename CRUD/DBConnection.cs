@@ -5,8 +5,8 @@ using MySqlConnector;
 {
       //Parent class that handles the server and user/pw for the database connection
       public MySqlConnection DBConnect()
-    {   //TODO Ändra namn på databasen till engelska. 
-         var connection = new MySqlConnection("Server=localhost;Database=aktiehandel;Uid=root;");
+    {   
+         var connection = new MySqlConnection("Server=localhost;Database=stock_trading;Uid=root;");
         return connection;
     }
 }

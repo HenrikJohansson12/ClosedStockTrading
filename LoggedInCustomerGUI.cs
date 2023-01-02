@@ -310,18 +310,29 @@ class LoggedInCustomerGUI
         List<StockTransaction> stockTransactions = new();
         //Hämta listan med transaktioner. 
         stockTransactions = stockTransactionDB.GetAllStockTransactionsByAccountId(accountId);
-
+        
         //Skriv ut
 
-        Console.WriteLine(string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10}", "Time stamp", "Stock", "List", "Type", "Price", "Amount"));
+        Console.WriteLine(string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", "Time stamp", "Stock", "List", "Type", "Price per stock", "Amount","Courtage","Sum"));
 
         foreach (var transaction in stockTransactions)
         {
+            transaction.CalculateTotalTransactionSum();
             string type;
             if (transaction.BuyerAccountId == accountId) type = "Buy";
             else type = "Sell";
-
-            string content = string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10}", transaction.TransactionTime, transaction.StockName, transaction.ListingName, type, transaction.PricePerStock, transaction.Amount);
+            double courtage, transactionSum;
+            if (type == "Sell") 
+            {
+                courtage = transaction.SellerCourtage; 
+                transactionSum = transaction.SellerTransactionSum;
+            }
+            else 
+            {courtage = transaction.BuyerCourtage; 
+            transactionSum = transaction.BuyerTransactionSum;
+            }
+           
+            string content = string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", transaction.TransactionTime, transaction.StockName, transaction.ListingName, type, transaction.PricePerStock, transaction.Amount,courtage,transactionSum);
             Console.WriteLine(content);
 
         }
