@@ -5,14 +5,14 @@ class LoggedInCustomerGUI
        loggedInCustomer = RefreshCustomer(loggedInCustomer);
         
         Console.Clear();
-        Console.WriteLine($"Välkommen {loggedInCustomer.Name}\n\n");
+        Console.WriteLine($"Welcome {loggedInCustomer.Name}\n\n");
 
         while (true)
         {
-            Console.WriteLine("Här är dina konton. Välj ett konto för att gå vidare");
+            Console.WriteLine("These are your stock accounts. Select an account to proceed");
 
             PrintStockAccountInfo(loggedInCustomer.CustomerStockAccounts);
-            //Tar in en siffra från användaren
+           
             int accountSelect = Convert.ToInt32(Console.ReadLine());
             
             int accountId = loggedInCustomer.CustomerStockAccounts[accountSelect - 1].Id;
@@ -26,12 +26,12 @@ class LoggedInCustomerGUI
                selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect-1];
 
                 Console.WriteLine("\n\n");
-                Console.WriteLine("[1] Se aktier på kontot");
-                Console.WriteLine("[2] Köpa aktier");
-                Console.WriteLine("[3] Sälja aktier");
-                Console.WriteLine("[4] Se aktiva ordrar");
-                Console.WriteLine("[5] Se historik");
-                Console.WriteLine("[6] Byt konto\n\n");
+                Console.WriteLine("[1] See stocks on account");
+                Console.WriteLine("[2] Buy stocks");
+                Console.WriteLine("[3] Sell stocks");
+                Console.WriteLine("[4] See my active orders");
+                Console.WriteLine("[5] See my transaction history");
+                Console.WriteLine("[6] Switch stock account\n\n");
 
                 var keypress = Console.ReadKey(true).KeyChar;
                 
@@ -71,60 +71,44 @@ class LoggedInCustomerGUI
         SellOrderManager sellOrderManager = new();
         ActiveOrder mySellOrder = new();
         bool closedTransaction;
-        bool successfulObjectCreated = false;
+        bool objectCreatedSuccessfully = false;
 
-        while (successfulObjectCreated == false)
+        while (objectCreatedSuccessfully == false)
         {
             //Visa alla aktier som går att sälja. 
             PrintCustomerStocksOnAccount(selectedStockAccount);
-            int stockId, amount;
-            double pricePerStock;
+            //Skapar säljorderobjektet. 
+            mySellOrder = CreateActiveSellOrderObject(selectedStockAccount.Id);
 
-            Console.WriteLine("Ange ID på den aktie du vill sälja");
-            stockId = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Ange vilket pris du vill sälja för");
-            pricePerStock = Convert.ToDouble(Console.ReadLine());
-            System.Console.WriteLine("Hur många vill du sälja?");
-            amount = Convert.ToInt32(Console.ReadLine());
-
-
-            mySellOrder.IsBuyOrder = false;
-            mySellOrder.IsActive = true;
-            //TODO är nog snyggare att använda constructor i klassen. 
-            mySellOrder.StockId = stockId;
-            mySellOrder.Amount = amount;
-            mySellOrder.PricePerStock = pricePerStock;
-            mySellOrder.OrderTimeStamp = DateTime.Now;
-            mySellOrder.AccountId = selectedStockAccount.Id;
             //Kollar så stockId och amount finns på kundens konto. 
             foreach (var stock in selectedStockAccount.OwnedStocks)
             {
                 if (stock.Id == mySellOrder.StockId && stock.AmountOnCustomerAccount >= mySellOrder.Amount == true)
                 {
 
-                    successfulObjectCreated = true;
+                    objectCreatedSuccessfully = true;
                     break;
                 }
 
             }
 
-            if (successfulObjectCreated == false) System.Console.WriteLine("Aktien finns inte på ditt konto eller du försöker sälja fler än du äger");
+            if (objectCreatedSuccessfully == false) System.Console.WriteLine("The stock or the number of stocks you are trying to sell does not exist on your account");
 
         }
-
+        
         closedTransaction = sellOrderManager.FullFillSellOrder(mySellOrder);
         if (closedTransaction == true)
         {
-            Console.WriteLine("Din säljorder gick till avslut");
+            Console.WriteLine("Your sellorder went to closure");
         }
-        else System.Console.WriteLine("Din order gick inte till avslut");
+        else System.Console.WriteLine("Your order did not go to closure");
 
 
     }
     public void CreateBuyOrder(int accountId)
     {
         BuyOrderManager buyOrderManager = new();
-        System.Console.WriteLine("Här kommer alla aktier som går att köpa");
+        System.Console.WriteLine("Here are the stocks you can buy");
         Thread.Sleep(1000);
         Console.WriteLine("\n\n\n");
         PrintAllStocks();
@@ -133,9 +117,9 @@ class LoggedInCustomerGUI
 
         if (buyOrderManager.FullFillBuyOrder(myActiveOrder) == true)
         {
-            System.Console.WriteLine("Din order gick till avslut!");
+            System.Console.WriteLine("Your buyorder went to closure");
         }
-        else System.Console.WriteLine("Din order gick inte till avslut");
+        else System.Console.WriteLine("Your buyorder did no go to closure");
 
     }
 
@@ -171,7 +155,7 @@ class LoggedInCustomerGUI
         stocks = listingDB.SetListingName(stocks);
 
         foreach (var stock in stocks)
-        {
+        {   //Hämtar in de senaste priserna från active order och slutförda transaktioner. 
             stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
             stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);
             stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);
@@ -245,12 +229,12 @@ class LoggedInCustomerGUI
         ActiveOrder myBuyOrder = new();
         myBuyOrder.IsBuyOrder = true;
         myBuyOrder.IsActive = true;
-        System.Console.WriteLine("Vilken aktie vill du köpa");
-        myBuyOrder.StockId = Convert.ToInt32(Console.ReadLine());
-        System.Console.WriteLine("Hur många vill du köpa");
-        myBuyOrder.Amount = Convert.ToInt32(Console.ReadLine());
-        System.Console.WriteLine("Till vilket pris?");
+        System.Console.WriteLine("Enter the id of the stock you want to buy");
+        myBuyOrder.StockId = Convert.ToInt32(Console.ReadLine()); 
+        System.Console.WriteLine("Enter the price you want to buy it for");
         myBuyOrder.PricePerStock = Convert.ToDouble(Console.ReadLine());
+        System.Console.WriteLine("Enter the amount you want to buy");
+        myBuyOrder.Amount = Convert.ToInt32(Console.ReadLine());
         myBuyOrder.OrderTimeStamp = DateTime.Now;
 
         myBuyOrder.AccountId = accountId;
@@ -262,13 +246,13 @@ class LoggedInCustomerGUI
     public ActiveOrder CreateActiveSellOrderObject(int accountId)
     {
         ActiveOrder mySellOrder = new();
-        mySellOrder.IsBuyOrder = true;
+        mySellOrder.IsBuyOrder = false;
         mySellOrder.IsActive = true;
-        System.Console.WriteLine("Ange ID på den aktie du vill sälja");
+        System.Console.WriteLine("Enter the id of the stock you want to sell");
         mySellOrder.StockId = Convert.ToInt32(Console.ReadLine());
-        System.Console.WriteLine("Hur mycket vill du sälja för??");
+        System.Console.WriteLine("Enter the price you want to sell for");
         mySellOrder.PricePerStock = Convert.ToDouble(Console.ReadLine());
-        System.Console.WriteLine("Hur många vill du Sälja");
+        System.Console.WriteLine("Enter the amount you want to sell");
         mySellOrder.Amount = Convert.ToInt32(Console.ReadLine());
 
         mySellOrder.OrderTimeStamp = DateTime.Now;

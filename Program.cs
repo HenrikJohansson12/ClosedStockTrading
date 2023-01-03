@@ -5,16 +5,16 @@
         CustomerDB customerDB = new();
         LoggedInCustomerGUI loggedInUserGUI = new();
 
-        Console.WriteLine("Välkommen till STOCK TECH \n[1] Logga in\n[2] Registrera ny kund (Inte tillgänglig)");
+        Console.WriteLine("Welcome till STOCK TECH \n[1] Log in as customer\n[2] Register new as customer (Currently not available)");
 
         if (Console.ReadKey(true).KeyChar == '1')
         {
             bool runLoop = true;
             while (runLoop == true)
             {
-                 System.Console.WriteLine("Ange personnummer");
+                 System.Console.WriteLine("Enter personal-number as yyyymmdd-xxxx");
                 string personalNumber = Console.ReadLine();
-                System.Console.WriteLine("Ange lösenord");
+                System.Console.WriteLine("Enter password");
                 string password = Console.ReadLine();
 
                 if (customerDB.CustomerLogIn(personalNumber, password) != null)
@@ -26,7 +26,7 @@
                     break;                   
                 }
 
-                else Console.WriteLine("Felaktigt användarnamn eller lösenord");
+                else Console.WriteLine("Wrong username/password, please try again");
             }            
         }      
     } 
