@@ -7,39 +7,39 @@ class StocksToAccountDB : DBConnection
     public bool CheckIfStockExistOnCustomerAccount(int stockId, int accountId)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@StockId",stockId);
-        parameters.Add("@AccountId",accountId);
-         string query = "SELECT id AS Id, account_id AS AccountId, stock_id AS StockId, amount AS Amount "
-         + "FROM stocks_to_account WHERE stock_id = @StockId AND account_id = @AccountId ;";
+        parameters.Add("@StockId", stockId);
+        parameters.Add("@AccountId", accountId);
+        string query = "SELECT id AS Id, account_id AS AccountId, stock_id AS StockId, amount AS Amount "
+        + "FROM stocks_to_account WHERE stock_id = @StockId AND account_id = @AccountId ;";
 
         using (var connection = DBConnect())
         {
             try
-            {   //Hittar den ett objekt returnera true
-                StocksToAccount result = connection.QuerySingle<StocksToAccount>(query,parameters);
-               return true;      
+            {   // If we find the stock on the customers account return true
+                StocksToAccount result = connection.QuerySingle<StocksToAccount>(query, parameters);
+                return true;
             }
-            //Hittar den ingen data returnera false. 
+            //Else return false.  
             catch (System.InvalidOperationException)
             {
                 return false;
             }
             catch (System.Exception e)
             {
-                 throw e;
+                throw e;
 
             }
         }
     }
 
-    public void CreateNewStocksToAccount (int accountId, int stockId,int amount)
+    public void CreateNewStocksToAccount(int accountId, int stockId, int amount)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@Amount",amount);
-        parameters.Add("@StockId",stockId);
-        parameters.Add("@AccountId",accountId);
+        parameters.Add("@Amount", amount);
+        parameters.Add("@StockId", stockId);
+        parameters.Add("@AccountId", accountId);
 
-        string query = "INSERT INTO `stocks_to_account` (`account_id`, `stock_id`, `amount`) "+ 
+        string query = "INSERT INTO `stocks_to_account` (`account_id`, `stock_id`, `amount`) " +
         "VALUES ( @AccountId, @StockId, @Amount);";
 
 
@@ -47,24 +47,24 @@ class StocksToAccountDB : DBConnection
         {
             try
             {
-                var result = connection.ExecuteScalar(query,parameters); 
-                           
+                var result = connection.ExecuteScalar(query, parameters);
+
             }
-         
+
             catch (System.Exception e)
             {
-                 throw e;
+                throw e;
 
             }
         }
     }
 
-    public void UpdateStocksToAccount (int accountId, int stockId,int amount) 
+    public void UpdateStocksToAccount(int accountId, int stockId, int amount)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@Amount",amount);
-        parameters.Add("@StockId",stockId);
-        parameters.Add("@AccountId",accountId);
+        parameters.Add("@Amount", amount);
+        parameters.Add("@StockId", stockId);
+        parameters.Add("@AccountId", accountId);
 
 
         string query = "UPDATE stocks_to_account SET amount = amount + @Amount WHERE account_id = @AccountId AND stock_id = @StockId;";
@@ -74,15 +74,15 @@ class StocksToAccountDB : DBConnection
         {
             try
             {
-                var result = connection.ExecuteScalar(query,parameters); 
-                           
+                var result = connection.ExecuteScalar(query, parameters);
+
             }
-         
+
             catch (System.Exception e)
             {
-                 throw e;
+                throw e;
 
             }
         }
     }
-}   
+}

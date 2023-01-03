@@ -27,21 +27,21 @@ class StockTransactionDB : DBConnection
 
     public List<StockTransaction> GetAllStockTransactionsByAccountId(int accountId)
     {
-        var parameters = new DynamicParameters ();
-        parameters.Add("@AccountId",accountId);
-        string query = "SELECT stock_transactions.id AS Id, buyer_account_id AS BuyerAccountId, seller_account_id AS SellerAccountId, "+
-        "price_per_stock AS PricePerStock, amount AS Amount, transaction_time AS TransactionTime, buyer_courtage AS BuyerCourtage, "+
-        "seller_courtage AS SellerCourtage, stock_id AS StockId, stocks.name AS StockName, listing.name AS ListingName "+
+        var parameters = new DynamicParameters();
+        parameters.Add("@AccountId", accountId);
+        string query = "SELECT stock_transactions.id AS Id, buyer_account_id AS BuyerAccountId, seller_account_id AS SellerAccountId, " +
+        "price_per_stock AS PricePerStock, amount AS Amount, transaction_time AS TransactionTime, buyer_courtage AS BuyerCourtage, " +
+        "seller_courtage AS SellerCourtage, stock_id AS StockId, stocks.name AS StockName, listing.name AS ListingName " +
         "FROM `stock_transactions` " +
-        "INNER JOIN stocks ON stocks.id = stock_id "+ 
-        "INNER JOIN listing ON stocks.listing_id = listing.id "+
+        "INNER JOIN stocks ON stocks.id = stock_id " +
+        "INNER JOIN listing ON stocks.listing_id = listing.id " +
         "WHERE buyer_account_id = @AccountId OR seller_account_id = @AccountId;";
 
         using (var connection = DBConnect())
         {
             try
             {
-                var result = connection.Query<StockTransaction>(query,parameters).ToList();
+                var result = connection.Query<StockTransaction>(query, parameters).ToList();
                 return result;
             }
 
@@ -51,15 +51,15 @@ class StockTransactionDB : DBConnection
             }
 
         }
-    
+
     }
 
     public double GetLatestStockTransactionPrice(int stockId)
     {
         var parameters = new DynamicParameters();
-        parameters.Add(@"StockId",stockId);
-        //Returnerar endast priset på den senaste ordern som gick till avslut. 
-        string query = "SELECT price_per_stock FROM stock_transactions  "+
+        parameters.Add(@"StockId", stockId);
+        //Returns only the price on the latest order that went to closure. 
+        string query = "SELECT price_per_stock FROM stock_transactions  " +
         " WHERE transaction_time = ( SELECT MAX(transaction_time) FROM stock_transactions WHERE stock_id = @StockId );";
 
         using (var connection = DBConnect())

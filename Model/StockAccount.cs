@@ -1,5 +1,5 @@
 class StockAccount
-{
+{   //Database properties
     public int Id { get; set; }
     public int CustomerId { get; set; }
     public int AccountTypeId { get; set; }
@@ -14,7 +14,7 @@ class StockAccount
     public double TotalStockValue { get; set; }
 
 
-    public void RefreshTotalStockValue()
+    public void CalculateTotalStockValue()
     {
         foreach (var stock in OwnedStocks)
         {

@@ -21,6 +21,7 @@
                 {
                     Customer loggedInCustomer = customerDB.CustomerLogIn(personalNumber, password);
                     runLoop = false;
+                    //Succesfull login start the GUI main menu. 
                     loggedInUserGUI.MainMenu(loggedInCustomer);
 
                     break;                   

@@ -1,12 +1,12 @@
 
 using MySqlConnector;
 
- public class DBConnection
+public class DBConnection
 {
-      //Parent class that handles the server and user/pw for the database connection
-      public MySqlConnection DBConnect()
-    {   
-         var connection = new MySqlConnection("Server=localhost;Database=stock_trading;Uid=root;");
+    //Parent class with the Connect method that the other CRUD-classes are inhereting 
+    public MySqlConnection DBConnect()
+    {
+        var connection = new MySqlConnection("Server=localhost;Database=stock_trading;Uid=root;");
         return connection;
     }
 }

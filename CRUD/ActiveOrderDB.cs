@@ -3,7 +3,7 @@ using Dapper;
 
 class ActiveOrderDB : DBConnection
 {
-    public int CreateActiveOrder(ActiveOrder myActiveOrder)
+    public int SaveActiveOrder(ActiveOrder myActiveOrder) //Saves the active order objects and return its ID from the database.  
     {
         var parameters = new DynamicParameters(myActiveOrder);
 
@@ -73,23 +73,23 @@ class ActiveOrderDB : DBConnection
 
     }
     public List<ActiveOrder> GetAllActiveOrdersByAccountId(int accountId)
-    {   //Innerjoinar stockName och listingName. 
-        var parameters = new DynamicParameters ();
-        parameters.Add("@AccountId",accountId);
+    {   //Innerjoin stockName and listingName. 
+        var parameters = new DynamicParameters();
+        parameters.Add("@AccountId", accountId);
         string query = "SELECT active_orders.id AS Id, stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock, " +
-        "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive, stocks.name AS StockName, listing.name AS ListingName "+
-        "FROM active_orders "+
-        "INNER JOIN stocks ON stock_id = stocks.id "+
-        "INNER JOIN listing ON stocks.listing_id = listing.id"+
+        "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive, stocks.name AS StockName, listing.name AS ListingName " +
+        "FROM active_orders " +
+        "INNER JOIN stocks ON stock_id = stocks.id " +
+        "INNER JOIN listing ON stocks.listing_id = listing.id" +
         " WHERE is_active = true AND account_id = @AccountId;";
 
-       
+
 
         using (var connection = DBConnect())
         {
             try
             {
-                var result = connection.Query<ActiveOrder>(query,parameters).ToList();
+                var result = connection.Query<ActiveOrder>(query, parameters).ToList();
                 return result;
             }
 
@@ -103,21 +103,21 @@ class ActiveOrderDB : DBConnection
 
     public List<ActiveOrder> GetCompatibleSellOrders(int stockId, double pricePerStock)
     {
-        //Vi letar efter en säljorder och vi vill sortera på de som vill sälja billigast först. 
+        //We are looking for a compatible sell order and therfore sorts on the one with the lowest price first. 
         var parameters = new DynamicParameters();
         parameters.Add("@StockId", stockId);
         parameters.Add("@PricePerStock", pricePerStock);
-       
+
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
          "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
-         "WHERE is_active = true AND is_buy_order = false AND stock_id = @StockId AND price_per_stock <= @PricePerStock"+
+         "WHERE is_active = true AND is_buy_order = false AND stock_id = @StockId AND price_per_stock <= @PricePerStock" +
          " ORDER BY price_per_stock ASC;";
 
         using (var connection = DBConnect())
         {
             try
             {
-                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query,parameters).ToList();
+                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query, parameters).ToList();
                 return compatableOrders;
             }
 
@@ -130,24 +130,25 @@ class ActiveOrderDB : DBConnection
     }
 
 
-     public List<ActiveOrder> GetCompatibleBuyOrders(int stockId, double pricePerStock)
+    public List<ActiveOrder> GetCompatibleBuyOrders(int stockId, double pricePerStock)
     {
-        //Vi letar efter en köporder så kollar vi så att priset är mindre eller lika med köparens pris. 
-        //Säljaren kommer få sitt efterfrågade pris oavsett vilken order vi säljer så vi sorterar på äldsta först så blir det rättvist. 
+
+        //Since we are looking for a buyorder we check that the price is less than or equal to the buyer price. 
+        //The seller will get their asked price regardless of which order we take but for fairness we pick the oldest active order first from the database. 
         var parameters = new DynamicParameters();
         parameters.Add("@StockId", stockId);
         parameters.Add("@PricePerStock", pricePerStock);
-       
+
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
          "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
-         "WHERE is_active = true AND is_buy_order = true AND stock_id = @StockId AND price_per_stock >= @PricePerStock"+
+         "WHERE is_active = true AND is_buy_order = true AND stock_id = @StockId AND price_per_stock >= @PricePerStock" +
          " ORDER BY order_time_stamp ASC;";
 
         using (var connection = DBConnect())
         {
             try
             {
-                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query,parameters).ToList();
+                List<ActiveOrder> compatableOrders = connection.Query<ActiveOrder>(query, parameters).ToList();
                 return compatableOrders;
             }
 
@@ -172,7 +173,7 @@ class ActiveOrderDB : DBConnection
             try
             {
                 double highestActiveBuyPrice = connection.QuerySingle<double>(query, parameters);
-                if (highestActiveBuyPrice != null) 
+                if (highestActiveBuyPrice != null)
                 {
                     return highestActiveBuyPrice;
                 }
@@ -230,10 +231,10 @@ class ActiveOrderDB : DBConnection
     }
 
 
-     public ActiveOrder GetActiveOrderById(int id)
+    public ActiveOrder GetActiveOrderById(int id)
     {
         var parameters = new DynamicParameters();
-        parameters.Add("@Id",id);
+        parameters.Add("@Id", id);
         string query = "SELECT id AS Id,stock_id AS StockId, account_id AS AccountId, price_per_stock AS PricePerStock," +
          "amount AS Amount, is_buy_order AS IsBuyOrder, order_time_stamp AS OrderTimeStamp, is_active AS IsActive FROM active_orders " +
          "WHERE id = @Id;";
@@ -242,7 +243,7 @@ class ActiveOrderDB : DBConnection
         {
             try
             {
-                ActiveOrder result = connection.QuerySingle<ActiveOrder>(query,parameters);
+                ActiveOrder result = connection.QuerySingle<ActiveOrder>(query, parameters);
                 return result;
             }
 

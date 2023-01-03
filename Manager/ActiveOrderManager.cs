@@ -4,41 +4,41 @@ class ActiveOrderManager
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
-        //Vi hämtar en sorterad lista med matchande ordrar.         
-        compatibleOrders = activeOrderDB.GetCompatibleSellOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
-        //Är listan tom returerar vi null. 
+        //Retrieves a sorted list of compatible order from the database        
+        compatibleOrders = activeOrderDB.GetCompatibleSellOrders(myActiveOrder.StockId, myActiveOrder.PricePerStock);
+        //If the list is empty we return null. 
         if (compatibleOrders.Count == 0)
         {
             return null;
         }
 
         else
-        {   //Finns det något i listan så returnerar vi det första objektet. 
+        {   //We return the first object in the list. 
             ActiveOrder compatibleOrder = compatibleOrders[0];
             return compatibleOrder;
         }
- 
-    } 
 
- public ActiveOrder GetCompatibleBuyOrder(ActiveOrder myActiveOrder)
+    }
+
+    public ActiveOrder GetCompatibleBuyOrder(ActiveOrder myActiveOrder)
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> compatibleOrders = new();
-        //Vi hämtar en sorterad lista med matchande ordrar.         
-        compatibleOrders = activeOrderDB.GetCompatibleBuyOrders(myActiveOrder.StockId,myActiveOrder.PricePerStock);
-        //Är listan tom returerar vi null. 
+        //Retrieves a sorted list of compatible order from the database           
+        compatibleOrders = activeOrderDB.GetCompatibleBuyOrders(myActiveOrder.StockId, myActiveOrder.PricePerStock);
+        //If the list is empty we return null. 
         if (compatibleOrders.Count == 0)
         {
             return null;
         }
 
         else
-        {   //Finns det något i listan så returnerar vi det första objektet. 
+        {   //We return the first object in the list.  
             ActiveOrder compatibleOrder = compatibleOrders[0];
             return compatibleOrder;
         }
- 
-    } 
 
-    
+    }
+
+
 }

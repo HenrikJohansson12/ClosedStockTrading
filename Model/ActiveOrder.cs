@@ -1,5 +1,5 @@
 class ActiveOrder
-{
+{   //Database properties
     public int Id { get; set; }
     public int StockId { get; set; }
     public int AccountId { get; set; }

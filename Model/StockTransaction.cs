@@ -1,5 +1,5 @@
 class StockTransaction
-{
+{   //Database properties
     public int Id { get; set; }
     public int BuyerAccountId { get; set; }
     public int SellerAccountId { get; set; }

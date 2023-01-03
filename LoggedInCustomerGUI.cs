@@ -127,7 +127,7 @@ class LoggedInCustomerGUI
         int stockAccountIndex = 1;
         foreach (var stockAccount in customerStockAccounts)
         {
-            stockAccount.RefreshTotalStockValue();
+            stockAccount.CalculateTotalStockValue();
             Console.WriteLine(string.Format("{0,-5} {1,-25} {2,-15} {3,-10} {4,-15}", stockAccountIndex, stockAccount.AccountName, stockAccount.TotalStockValue, stockAccount.BalanceInSek, stockAccount.TotalStockValue + stockAccount.BalanceInSek));
             stockAccountIndex++;
         }
@@ -150,7 +150,7 @@ class LoggedInCustomerGUI
         ListingDB listingDB = new();
         StockTransactionDB stockTransactionDB = new();
         List<Stock> stocks = stockDB.ReadAllStocks();
-        stocks = listingDB.SetListingName(stocks);
+        stocks = listingDB.GetListingName(stocks);
 
         foreach (var stock in stocks)
         {   //Hämtar in de senaste priserna från active order och slutförda transaktioner. 
@@ -199,7 +199,7 @@ class LoggedInCustomerGUI
         //Hämtar en lista med aktier på som finns på varje konto. 
         foreach (var stockAccount in customerStockAccounts)
         {
-            stockAccount.OwnedStocks = stockDB.StocksByAccountId(stockAccount.Id);
+            stockAccount.OwnedStocks = stockDB.GetStocksByAccountId(stockAccount.Id);
         }
         return customerStockAccounts;
     }
