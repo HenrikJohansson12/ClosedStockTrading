@@ -85,11 +85,9 @@ class LoggedInCustomerGUI
             {
                 if (stock.Id == mySellOrder.StockId && stock.AmountOnCustomerAccount >= mySellOrder.Amount == true)
                 {
-
-                    objectCreatedSuccessfully = true;
+                  objectCreatedSuccessfully = true;
                     break;
                 }
-
             }
 
             if (objectCreatedSuccessfully == false) System.Console.WriteLine("The stock or the number of stocks you are trying to sell does not exist on your account");
@@ -99,9 +97,9 @@ class LoggedInCustomerGUI
         closedTransaction = sellOrderManager.FullFillSellOrder(mySellOrder);
         if (closedTransaction == true)
         {
-            Console.WriteLine("Your sellorder went to closure");
+            Console.WriteLine("You have successfully sold the stock");
         }
-        else System.Console.WriteLine("Your order did not go to closure");
+        else System.Console.WriteLine("No buyers were found at your desired price \n Your order will remain active until we find a buyer");
 
 
     }
@@ -117,9 +115,9 @@ class LoggedInCustomerGUI
 
         if (buyOrderManager.FullFillBuyOrder(myActiveOrder) == true)
         {
-            System.Console.WriteLine("Your buyorder went to closure");
+            System.Console.WriteLine("You have successfully bought the stock");
         }
-        else System.Console.WriteLine("Your buyorder did no go to closure");
+        else System.Console.WriteLine("No sellers were found at your desired price \n Your order will remain active until we find a seller");
 
     }
 
@@ -162,7 +160,6 @@ class LoggedInCustomerGUI
         }
 
         Console.WriteLine(string.Format("{0,-10} {1,-10} {2,-30} {3,-25} {4,-25} {5,-15} {6,-15} {7,-15}", "Id", "Ticker", "Name", "Sector", "List", "Highest Buy", "Lowest Sell", "Last sold for"));
-
 
         foreach (var stock in stocks)
         {
