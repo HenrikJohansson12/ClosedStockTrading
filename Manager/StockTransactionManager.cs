@@ -1,9 +1,9 @@
 class StockTransactionManager
 {
-    
+
     public StockTransaction CreateStockTransactionObject(ActiveOrder buyOrder, ActiveOrder sellOrder)
-    {   
-        
+    {
+
         StockTransaction stockTransaction = new();
 
         stockTransaction.BuyerAccountId = buyOrder.AccountId;
@@ -18,18 +18,18 @@ class StockTransactionManager
         stockTransaction.TransactionTime = DateTime.Now;
         //Use the selling price since its the lowest. 
         stockTransaction.PricePerStock = sellOrder.PricePerStock;
-        
-       stockTransaction.Amount = buyOrder.Amount;
+
+        stockTransaction.Amount = buyOrder.Amount;
 
         return stockTransaction;
     }
 
 
-    public int SaveStockTransactionToDataBase (StockTransaction myStockTransaction)
+    public int SaveStockTransactionToDataBase(StockTransaction myStockTransaction)
     {
         StockTransactionDB stockTransactionDB = new();
         int transactionId = stockTransactionDB.SaveStockTransactionToDataBase(myStockTransaction);
-       return transactionId;
+        return transactionId;
     }
 
 
@@ -37,33 +37,33 @@ class StockTransactionManager
     public void UpdateStockAccountBalanceAfterStockTransaction(StockTransaction stockTransaction)
     {
         StockAccountDB stockAccountDB = new();
-        
+
         stockTransaction.CalculateTotalTransactionSum();
-       //Remove the balance from the buyer account
-        stockAccountDB.UpdateBalanceStockAccount(stockTransaction.BuyerAccountId,stockTransaction.BuyerTransactionSum);
+        //Remove the balance from the buyer account
+        stockAccountDB.UpdateBalanceStockAccount(stockTransaction.BuyerAccountId, stockTransaction.BuyerTransactionSum);
         //Add the balace to the seller account
-        stockAccountDB.UpdateBalanceStockAccount(stockTransaction.SellerAccountId,stockTransaction.SellerTransactionSum);
+        stockAccountDB.UpdateBalanceStockAccount(stockTransaction.SellerAccountId, stockTransaction.SellerTransactionSum);
 
     }
 
     public void UpdateStocksToAccountAfterStockTransaction(StockTransaction stockTransaction)
     {
-        //Vi måste kolla ifall köparen redan har aktien. Vi vill inte att det ska gå in dubletter i databasen. 
+        //We need to check if the buying customer already owns the stock. 
         StocksToAccountDB stocksToAccountDB = new();
         StocksToAccount stocksToAccount = new();
 
-        if (stocksToAccountDB.CheckIfStockExistOnCustomerAccount(stockTransaction.StockId,stockTransaction.BuyerAccountId) == true)
+        if (stocksToAccountDB.CheckIfStockExistOnCustomerAccount(stockTransaction.StockId, stockTransaction.BuyerAccountId) == true)
         {
-            //Finns redan aktien så behöver vi ändra på kunden. 
-            stocksToAccountDB.UpdateStocksToAccount(stockTransaction.BuyerAccountId,stockTransaction.StockId,stockTransaction.Amount);
-        } 
-        else //Finns den inte behöver den skapas på nytt. 
+            //If it exists we update the amount. 
+            stocksToAccountDB.UpdateStocksToAccount(stockTransaction.BuyerAccountId, stockTransaction.StockId, stockTransaction.Amount);
+        }
+        else //If not we save it as a new record. 
         {
-            stocksToAccountDB.CreateNewStocksToAccount(stockTransaction.BuyerAccountId,stockTransaction.StockId,stockTransaction.Amount);
+            stocksToAccountDB.CreateNewStocksToAccount(stockTransaction.BuyerAccountId, stockTransaction.StockId, stockTransaction.Amount);
         }
 
-        //Antalet aktier behöver tas bort från användaren.
+        //Finnally remove the amount from the seller. 
         int amount = -stockTransaction.Amount;
-        stocksToAccountDB.UpdateStocksToAccount(stockTransaction.SellerAccountId,stockTransaction.StockId,amount);
+        stocksToAccountDB.UpdateStocksToAccount(stockTransaction.SellerAccountId, stockTransaction.StockId, amount);
     }
 }

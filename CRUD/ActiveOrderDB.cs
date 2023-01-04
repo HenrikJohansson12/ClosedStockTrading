@@ -254,5 +254,28 @@ class ActiveOrderDB : DBConnection
 
         }
     }
+
+
+    public int GetNumberOfActiveOrders ()
+    {   
+        string query = "SELECT COUNT(DISTINCT id)FROM active_orders "+
+                       "WHERE active_orders.is_active = TRUE;";
+
+         using (var connection = DBConnect())
+        {
+            try
+            {
+                int result = connection.QuerySingle<int>(query);
+                return result;
+            }
+
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+        }
+    }
+
 }
 

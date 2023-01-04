@@ -1,29 +1,31 @@
 class LoggedInCustomerGUI
 {
     public void MainMenu(Customer loggedInCustomer)
-    {   //Laddar in den inloggade kundens konton samt aktier tillhörande dessa konton. 
-       loggedInCustomer = RefreshCustomer(loggedInCustomer);
-        
+    {  
+        //Loads the customer accounts with belonging stocks and prices from the database.
+        loggedInCustomer = RefreshCustomer(loggedInCustomer);
+
         Console.Clear();
-        Console.WriteLine($"Welcome {loggedInCustomer.Name}\n\n");
+        Console.WriteLine($"Welcome {loggedInCustomer.Name}\n");
+        Console.WriteLine($"Current number of active orders: {GetNumberOfActiveOrders()}\n");
 
         while (true)
         {
             Console.WriteLine("These are your stock accounts. Select an account to proceed");
 
             PrintStockAccountInfo(loggedInCustomer.CustomerStockAccounts);
-           
+
             int accountSelect = Convert.ToInt32(Console.ReadLine());
-            
+
             int accountId = loggedInCustomer.CustomerStockAccounts[accountSelect - 1].Id;
             StockAccount selectedStockAccount = new();
             selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect - 1];
             bool menuLoop = true;
 
             while (menuLoop == true)
-            {   
-               loggedInCustomer = RefreshCustomer(loggedInCustomer);
-               selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect-1];
+            {
+                loggedInCustomer = RefreshCustomer(loggedInCustomer);
+                selectedStockAccount = loggedInCustomer.CustomerStockAccounts[accountSelect - 1];
 
                 Console.WriteLine("\n\n");
                 Console.WriteLine("[1] See stocks on account");
@@ -34,7 +36,7 @@ class LoggedInCustomerGUI
                 Console.WriteLine("[6] Switch stock account\n\n");
 
                 var keypress = Console.ReadKey(true).KeyChar;
-                
+
                 switch (keypress)
                 {
                     case '1': PrintCustomerStocksOnAccount(selectedStockAccount); break;
@@ -56,14 +58,19 @@ class LoggedInCustomerGUI
         }
 
     }
-
+    public int GetNumberOfActiveOrders()
+    {   
+        ActiveOrderDB activeOrderDB = new();
+        int nrOfActiveOrders;
+        return  nrOfActiveOrders = activeOrderDB.GetNumberOfActiveOrders();
+    }
     public Customer RefreshCustomer(Customer loggedInCustomer)
     {
         loggedInCustomer.CustomerStockAccounts = LoadCustomerAccounts(loggedInCustomer.Id);
         loggedInCustomer.CustomerStockAccounts = LoadCustomerStocks(loggedInCustomer.CustomerStockAccounts);
         loggedInCustomer.CustomerStockAccounts = RefreshStockPrices(loggedInCustomer.CustomerStockAccounts);
         return loggedInCustomer;
-        
+
     }
 
     public void CreateSellOrder(StockAccount selectedStockAccount)
@@ -75,17 +82,17 @@ class LoggedInCustomerGUI
 
         while (objectCreatedSuccessfully == false)
         {
-            //Visa alla aktier som går att sälja. 
+            //Prints the stocks that the customer owns on their account. 
             PrintCustomerStocksOnAccount(selectedStockAccount);
-            //Skapar säljorderobjektet. 
+            //Create the sell order object. 
             mySellOrder = CreateActiveSellOrderObject(selectedStockAccount.Id);
 
-            //Kollar så stockId och amount finns på kundens konto. 
+            //Verifying that the stocks and amount actually exists on their account. 
             foreach (var stock in selectedStockAccount.OwnedStocks)
             {
                 if (stock.Id == mySellOrder.StockId && stock.AmountOnCustomerAccount >= mySellOrder.Amount == true)
                 {
-                  objectCreatedSuccessfully = true;
+                    objectCreatedSuccessfully = true;
                     break;
                 }
             }
@@ -93,7 +100,7 @@ class LoggedInCustomerGUI
             if (objectCreatedSuccessfully == false) System.Console.WriteLine("The stock or the number of stocks you are trying to sell does not exist on your account");
 
         }
-        
+
         closedTransaction = sellOrderManager.FullFillSellOrder(mySellOrder);
         if (closedTransaction == true)
         {
@@ -137,7 +144,7 @@ class LoggedInCustomerGUI
     public List<StockAccount> LoadCustomerAccounts(int customerId)
     {
         StockAccountDB stockAccountDB = new();
-        //Hämta lista med aktiekonton
+        //Retrieves the list of customer stock accounts from the database. 
         List<StockAccount> customerStockAccounts = stockAccountDB.GetCustomerStockAccountFromDataBase(customerId);
 
         return customerStockAccounts;
@@ -153,7 +160,7 @@ class LoggedInCustomerGUI
         stocks = listingDB.GetListingName(stocks);
 
         foreach (var stock in stocks)
-        {   //Hämtar in de senaste priserna från active order och slutförda transaktioner. 
+        {   //Reads the latest prices from the database. 
             stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
             stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);
             stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);
@@ -196,7 +203,7 @@ class LoggedInCustomerGUI
     {
         StockDB stockDB = new();
 
-        //Hämtar en lista med aktier på som finns på varje konto. 
+        //Gets a list of stocks on each stock account. 
         foreach (var stockAccount in customerStockAccounts)
         {
             stockAccount.OwnedStocks = stockDB.GetStocksByAccountId(stockAccount.Id);
@@ -216,7 +223,7 @@ class LoggedInCustomerGUI
                 stock.HighestActiveBuyPrice = activeOrderDB.GetHighestActiveBuyPrice(stock.Id);
                 stock.LowestActiveSellPrice = activeOrderDB.GetLowestActiveSellPrice(stock.Id);
                 stock.LastKnownPrice = stockTransactionDB.GetLatestStockTransactionPrice(stock.Id);
-                
+
             }
         }
         return customerStockAccounts;
@@ -227,7 +234,7 @@ class LoggedInCustomerGUI
         myBuyOrder.IsBuyOrder = true;
         myBuyOrder.IsActive = true;
         System.Console.WriteLine("Enter the id of the stock you want to buy");
-        myBuyOrder.StockId = Convert.ToInt32(Console.ReadLine()); 
+        myBuyOrder.StockId = Convert.ToInt32(Console.ReadLine());
         System.Console.WriteLine("Enter the price you want to buy it for");
         myBuyOrder.PricePerStock = Convert.ToDouble(Console.ReadLine());
         System.Console.WriteLine("Enter the amount you want to buy");
@@ -264,11 +271,11 @@ class LoggedInCustomerGUI
     {
         ActiveOrderDB activeOrderDB = new();
         List<ActiveOrder> activeOrders = new();
-        //Hämta listan med aktiva ordrar. 
+        //Get the list of active orders by accountId
         activeOrders = activeOrderDB.GetAllActiveOrdersByAccountId(accountId);
 
-        //Skriv ut
-
+        
+        //Prints it. 
         Console.WriteLine(string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10}", "Time stamp", "Stock", "List", "Type", "Price", "Amount"));
 
         foreach (var order in activeOrders)
@@ -289,12 +296,12 @@ class LoggedInCustomerGUI
     {
         StockTransactionDB stockTransactionDB = new();
         List<StockTransaction> stockTransactions = new();
-        //Hämta listan med transaktioner. 
+        //Get the list of transactions from the database. 
         stockTransactions = stockTransactionDB.GetAllStockTransactionsByAccountId(accountId);
-        
-        //Skriv ut
 
-        Console.WriteLine(string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", "Time stamp", "Stock", "List", "Type", "Price per stock", "Amount","Courtage","Sum"));
+        //Printing it
+
+        Console.WriteLine(string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", "Time stamp", "Stock", "List", "Type", "Price per stock", "Amount", "Courtage", "Sum"));
 
         foreach (var transaction in stockTransactions)
         {
@@ -303,17 +310,18 @@ class LoggedInCustomerGUI
             if (transaction.BuyerAccountId == accountId) type = "Buy";
             else type = "Sell";
             double courtage, transactionSum;
-            if (type == "Sell") 
+            if (type == "Sell")
             {
-                courtage = transaction.SellerCourtage; 
+                courtage = transaction.SellerCourtage;
                 transactionSum = transaction.SellerTransactionSum;
             }
-            else 
-            {courtage = transaction.BuyerCourtage; 
-            transactionSum = transaction.BuyerTransactionSum;
+            else
+            {
+                courtage = transaction.BuyerCourtage;
+                transactionSum = transaction.BuyerTransactionSum;
             }
-           
-            string content = string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", transaction.TransactionTime, transaction.StockName, transaction.ListingName, type, transaction.PricePerStock, transaction.Amount,courtage,transactionSum);
+
+            string content = string.Format("{0,-25} {1,-20} {2,-30} {3,-10} {4,-10} {5,-10} {6,-10} {7,-10}", transaction.TransactionTime, transaction.StockName, transaction.ListingName, type, transaction.PricePerStock, transaction.Amount, courtage, transactionSum);
             Console.WriteLine(content);
 
         }

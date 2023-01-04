@@ -1,5 +1,6 @@
 class StocksToAccount
-{   //Database properties
+{  
+     //Database properties
     public int Id { get; set; }
     public int AccountId { get; set; }
     public int StockId { get; set; }

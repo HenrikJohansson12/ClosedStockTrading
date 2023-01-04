@@ -4,7 +4,7 @@
     {    
         CustomerDB customerDB = new();
         LoggedInCustomerGUI loggedInUserGUI = new();
-
+        
         Console.WriteLine("Welcome till STOCK TECH \n[1] Log in as customer\n[2] Register new as customer (Currently not available)");
 
         if (Console.ReadKey(true).KeyChar == '1')
